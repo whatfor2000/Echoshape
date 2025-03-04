@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Visualizer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #uploadForm {
+            margin-bottom: 20px;
+        }
+        #outputImage {
+            margin-top: 20px;
+            max-width: 100%;
+        }
+        audio {
+            margin-top: 20px;
+        }
+        #recordButton {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>อัปโหลดไฟล์เสียงเพื่อสร้างภาพ</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" id="audioFile" name="file" accept="audio/*" required>
+        <button type="submit">อัปโหลด</button>
+    </form>
+
+    <button id="recordButton">บันทึกเสียง</button>
+    
+    <h3 id="centroidText"></h3>
+    <img id="outputImage" style="display: none;">
+    
+    <audio id="audioPlayer" controls style="display: none;"></audio>
+
+    <script>
+        // Handle file upload
+        document.getElementById("uploadForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let formData = new FormData();
+            let fileInput = document.getElementById("audioFile");
+            if (fileInput.files.length === 0) {
+                alert("กรุณาเลือกไฟล์เสียง!");
+                return;
+            }
+
+            formData.append("file", fileInput.files[0]);
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert("เกิดข้อผิดพลาด: " + data.error);
+                } else {
+                    document.getElementById("centroidText").innerText = "Spectral Centroid: " + data.centroid.toFixed(2) + " Hz";
+                    document.getElementById("outputImage").src = "data:image/png;base64," + data.image;
+                    document.getElementById("outputImage").style.display = "block";
+                    
+                    let audioPlayer = document.getElementById("audioPlayer");
+                    audioPlayer.src = data.audio.split('/').pop();
+                    audioPlayer.style.display = "block";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+
+        // Handle audio recording
+        document.getElementById("recordButton").addEventListener("click", function() {
+            fetch("/record", { method: "POST" })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.audio) {
+                        let audioPlayer = document.getElementById("audioPlayer");
+                        audioPlayer.src = "/uploads/" + data.audio;
+                        audioPlayer.style.display = "block";
+                    }
+                    alert(data.message);
+                })
+                .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>
