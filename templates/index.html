@@ -261,22 +261,23 @@
             // Submit recorded audio
             async function submitAudioRecording(audioBlob) {
                 const formData = new FormData();
-                formData.append('audio_data', audioBlob, 'recorded_audio.wav');
-                
+                formData.append("file", audioBlob, "recorded_audio.wav");
+
                 try {
-                    const response = await fetch('/record', {
-                        method: 'POST',
-                        body: formData
+                    const response = await fetch("/upload", {
+                        method: "POST",
+                        body: formData,
                     });
-                    
+
                     const data = await response.json();
                     displayResults(data);
                 } catch (error) {
-                    console.error('Error:', error);
-                    alert('Error analyzing audio. Please try again.');
-                    loadingIndicator.style.display = 'none';
+                    console.error("Error:", error);
+                    alert("Error analyzing audio. Please try again.");
+                    loadingIndicator.style.display = "none";
                 }
             }
+
             
             // Upload form submit handler
             uploadForm.addEventListener('submit', async function(e) {
@@ -310,73 +311,24 @@
             
             // Display results function
             function displayResults(data) {
-                loadingIndicator.style.display = 'none';
-                resultsContainer.style.display = 'block';
-                resultsContent.innerHTML = '';
-                
+                loadingIndicator.style.display = "none";
+                resultsContainer.style.display = "block";
+                resultsContent.innerHTML = "";
+
                 if (data.error) {
-                    resultsContent.innerHTML = `
-                        <div class="alert alert-danger">
-                            ${data.error}
-                        </div>
-                    `;
+                    resultsContent.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
                     return;
                 }
-                
-                if (!data.results || data.results.length === 0) {
-                    resultsContent.innerHTML = `
-                        <div class="alert alert-warning">
-                            No clear audio patterns detected. Try a different audio sample.
-                        </div>
-                    `;
-                    return;
-                }
-                
-                // Create cards for each result
-                data.results.forEach(result => {
-                    const confidenceValue = parseFloat(result.confidence);
-                    let badgeClass = 'bg-secondary';
-                    
-                    if (confidenceValue > 0.8) {
-                        badgeClass = 'bg-success';
-                    } else if (confidenceValue > 0.5) {
-                        badgeClass = 'bg-primary';
-                    } else if (confidenceValue > 0.3) {
-                        badgeClass = 'bg-warning text-dark';
-                    }
-                    
-                    const resultCard = document.createElement('div');
-                    resultCard.className = 'card result-card';
-                    resultCard.innerHTML = `
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">${result.class.replace('_', ' ').toUpperCase()}</h5>
-                            <span class="badge ${badgeClass}">${(confidenceValue * 100).toFixed(0)}% confidence</span>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-subtitle mb-2 text-muted">Generated AI Image Prompt:</h6>
-                            <p class="card-text">${result.prompt}</p>
-                            <button class="btn btn-sm btn-outline-primary copy-btn" data-prompt="${result.prompt}">
-                                Copy Prompt
-                            </button>
-                        </div>
-                    `;
-                    
-                    resultsContent.appendChild(resultCard);
-                });
-                
-                // Add copy button functionality
-                document.querySelectorAll('.copy-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const prompt = this.getAttribute('data-prompt');
-                        navigator.clipboard.writeText(prompt).then(() => {
-                            const originalText = this.innerHTML;
-                            this.innerHTML = 'Copied!';
-                            setTimeout(() => {
-                                this.innerHTML = originalText;
-                            }, 2000);
-                        });
-                    });
-                });
+
+                const emotion = data[0]?.label || "Unknown";
+                const confidence = data[0]?.score || 0;
+
+                resultsContent.innerHTML = `
+                    <div class="alert alert-info">
+                        Detected Emotion: <strong>${emotion.toUpperCase()}</strong> <br>
+                        Confidence: ${(confidence * 100).toFixed(2)}%
+                    </div>
+                `;
             }
         });
     </script>
