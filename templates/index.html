@@ -206,7 +206,7 @@
                     };
                     
                     mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
                         await submitAudioRecording(audioBlob);
                         audioChunks = [];
                     };
@@ -261,7 +261,7 @@
             // Submit recorded audio
             async function submitAudioRecording(audioBlob) {
                 const formData = new FormData();
-                formData.append("file", audioBlob, "recorded_audio.wav");
+                formData.append("file", audioBlob, "recorded_audio.mp3");
 
                 try {
                     const response = await fetch("/upload", {

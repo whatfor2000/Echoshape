@@ -3,6 +3,8 @@ import os
 import torch
 import torchaudio
 from transformers import Wav2Vec2ForSequenceClassification, Wav2Vec2FeatureExtractor
+import numpy as np
+import soundfile as sf
 
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
@@ -35,6 +37,8 @@ def load_and_preprocess_audio(file_path, target_sr=16000):
         # Load audio file using torchaudio
         speech_array, sampling_rate = torchaudio.load(file_path)
         
+        print(f"Sampling Rate: {sampling_rate}")
+        print(f"Audio Shape: {speech_array.shape}")
         # Resample if necessary
         if sampling_rate != target_sr:
             resampler = torchaudio.transforms.Resample(sampling_rate, target_sr)
@@ -69,19 +73,19 @@ def upload_audio():
     os.makedirs("uploads", exist_ok=True)
     
     # Generate a unique filename with .mp3 extension
-    import uuid
-    unique_filename = f"{uuid.uuid4()}.mp3"
-    audio_path = os.path.join("uploads", unique_filename)
+    
+    audio_path = os.path.join("uploads", audio_file.filename)
     
     try:
         # Read file content into memory
         file_content = audio_file.read()
-        
+        # print(file_content)
         # Ensure directory exists
         os.makedirs(os.path.dirname(audio_path), exist_ok=True)
         
+
         # Save the file content
-        with open(audio_path, 'wb') as f:
+        with open(audio_path, 'wb+') as f:
             f.write(file_content)
         
         # Verify file was saved
@@ -90,7 +94,7 @@ def upload_audio():
 
         # Load and preprocess the audio
         speech_array, sampling_rate = load_and_preprocess_audio(audio_path)
-        
+        print("test")
         # Prepare inputs for the model
         inputs = feature_extractor(
             speech_array, 
@@ -115,7 +119,7 @@ def upload_audio():
         }
 
         # Remove the file after processing
-        os.remove(audio_path)
+        # os.remove(audio_path)
 
         return jsonify({
             "message": "Emotion recognized successfully",
@@ -125,11 +129,11 @@ def upload_audio():
 
     except Exception as e:
         # If processing fails, try to remove the file
-        try:
-            if os.path.exists(audio_path):
-                os.remove(audio_path)
-        except:
-            pass
+        # try:
+        #     if os.path.exists(audio_path):
+        #         os.remove(audio_path)
+        # except:
+        #     pass
         
         return jsonify({
             "error": f"Error processing audio: {str(e)}"
