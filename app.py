@@ -1,58 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import os
-import torch
-import torchaudio
-from transformers import Wav2Vec2ForSequenceClassification, Wav2Vec2FeatureExtractor
-import numpy as np
-import soundfile as sf
-
+from ThaiserEmotionModel import Thaiser
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
-# Load pretrained feature extractor and model
-model_name = "ehcalabres/wav2vec2-lg-xlsr-en-speech-emotion-recognition"
-feature_extractor = Wav2Vec2FeatureExtractor.from_pretrained(model_name)
-model = Wav2Vec2ForSequenceClassification.from_pretrained(model_name)
-
-# Define emotion labels
-EMOTION_LABELS = [
-    "angry", 
-    "calm", 
-    "disgust", 
-    "fear", 
-    "happy", 
-    "neutral", 
-    "sad", 
-    "surprise"
-]
-
-def load_and_preprocess_audio(file_path, target_sr=16000):
-    """
-    Load audio file and preprocess it for Wav2Vec2 model
-    """
-    try:
-        # Verify file exists and is readable
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"File not found: {file_path}")
-
-        # Load audio file using torchaudio
-        speech_array, sampling_rate = torchaudio.load(file_path)
-        
-        print(f"Sampling Rate: {sampling_rate}")
-        print(f"Audio Shape: {speech_array.shape}")
-        # Resample if necessary
-        if sampling_rate != target_sr:
-            resampler = torchaudio.transforms.Resample(sampling_rate, target_sr)
-            speech_array = resampler(speech_array)
-        
-        # Ensure mono channel
-        if speech_array.ndim > 1:
-            speech_array = speech_array.mean(dim=0)
-        
-        return speech_array.numpy(), target_sr
-    
-    except Exception as e:
-        print(f"Audio loading error details: {e}")
-        raise
 
 @app.route("/")
 def home():
@@ -92,48 +42,32 @@ def upload_audio():
         if not os.path.exists(audio_path):
             raise IOError(f"Failed to save file to {audio_path}")
 
-        # Load and preprocess the audio
-        speech_array, sampling_rate = load_and_preprocess_audio(audio_path)
-        print("test")
-        # Prepare inputs for the model
-        inputs = feature_extractor(
-            speech_array, 
-            sampling_rate=sampling_rate, 
-            return_tensors="pt", 
-            padding=True
-        )
-
-        # Perform emotion recognition
-        with torch.no_grad():
-            logits = model(inputs.input_values).logits
-
-        # Get probabilities and predicted emotion
-        probabilities = torch.softmax(logits, dim=1)
-        predicted_emotion_idx = torch.argmax(probabilities, dim=1).item()
-        predicted_emotion = EMOTION_LABELS[predicted_emotion_idx]
-        
-        # Get emotion probabilities
-        emotion_probs = {
-            label: prob.item() 
-            for label, prob in zip(EMOTION_LABELS, probabilities[0])
-        }
-
+        # Process the audio file
+        result = Thaiser(audio_path)
+        print("=====================================")
+        print(result)
         # Remove the file after processing
-        # os.remove(audio_path)
+        os.remove(audio_path)
 
         return jsonify({
             "message": "Emotion recognized successfully",
-            "emotion": predicted_emotion,
-            "probabilities": emotion_probs
+            "probabilities": {
+                "anger": result['confidence_scores'][0],
+                "frustration": result['confidence_scores'][1],
+                "happiness": result['confidence_scores'][2],
+                "neutral": result['confidence_scores'][3],
+                "sadness": result['confidence_scores'][4],
+            }
         })
+
 
     except Exception as e:
         # If processing fails, try to remove the file
-        # try:
-        #     if os.path.exists(audio_path):
-        #         os.remove(audio_path)
-        # except:
-        #     pass
+        try:
+            if os.path.exists(audio_path):
+                os.remove(audio_path)
+        except:
+            pass
         
         return jsonify({
             "error": f"Error processing audio: {str(e)}"
