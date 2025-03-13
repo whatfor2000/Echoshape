@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import os
 from ThaiserEmotionModel import Thaiser
+from wav2vec2 import Speechtotext  
+from whisper import inference
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 
@@ -43,21 +45,29 @@ def upload_audio():
             raise IOError(f"Failed to save file to {audio_path}")
 
         # Process the audio file
-        result = Thaiser(audio_path)
+        resultemotion = Thaiser(audio_path)
         print("=====================================")
-        print(result)
+        print(resultemotion)
+        resultText = Speechtotext(audio_path)
+        print("=====================================")
+        print(resultText)
+        resultewhisper = inference(audio_path)
+        print("=====================================")
+        print(resultewhisper)
         # Remove the file after processing
         os.remove(audio_path)
 
         return jsonify({
             "message": "Emotion recognized successfully",
             "probabilities": {
-                "anger": result['confidence_scores'][0],
-                "frustration": result['confidence_scores'][1],
-                "happiness": result['confidence_scores'][2],
-                "neutral": result['confidence_scores'][3],
-                "sadness": result['confidence_scores'][4],
-            }
+                "anger": resultemotion['confidence_scores'][0],
+                "frustration": resultemotion['confidence_scores'][1],
+                "happiness": resultemotion['confidence_scores'][2],
+                "neutral": resultemotion['confidence_scores'][3],
+                "sadness": resultemotion['confidence_scores'][4],
+            },
+            "wav2vec2": resultText,
+            "whisper": resultewhisper
         })
 
 
