@@ -51,4 +51,3 @@ def Speechtotext(audio_file):
     # Get transcription
     transcription = transcribe_audio(audio_file, processor, model)
     return transcription
-

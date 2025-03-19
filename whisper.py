@@ -28,4 +28,4 @@ def inference(path: str) -> str:
     transcriptions = processor.tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)
     return transcriptions[0]
 
-print(inference(path=path))
+# print(inference(path=path))

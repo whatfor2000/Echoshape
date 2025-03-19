@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,29 +11,43 @@
             padding-top: 2rem;
             background-color: #f8f9fa;
         }
+
         .recording {
             animation: pulse 1.5s infinite;
             background-color: #dc3545 !important;
             border-color: #dc3545 !important;
         }
+
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
+
         .result-card {
             margin-bottom: 1rem;
             transition: all 0.3s ease;
         }
+
         .result-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
+
         .confidence-badge {
             position: absolute;
             top: 10px;
             right: 10px;
         }
+
         #audioVisualization {
             width: 100%;
             height: 60px;
@@ -42,6 +57,7 @@
             position: relative;
             overflow: hidden;
         }
+
         .visualizer-bar {
             position: absolute;
             bottom: 0;
@@ -50,20 +66,38 @@
             margin-right: 1px;
             border-radius: 1px 1px 0 0;
         }
+
         #loadingIndicator {
             display: none;
         }
+
         .copy-btn {
             position: absolute;
             bottom: 10px;
             right: 10px;
             opacity: 0.7;
         }
+
         .copy-btn:hover {
             opacity: 1;
         }
+
+        #transcriptDisplay {
+            margin-top: 1rem;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            min-height: 60px;
+        }
+
+        #interim {
+            color: #6c757d;
+            font-style: italic;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="row justify-content-center">
@@ -73,37 +107,44 @@
                         <h3 class="mb-0">Audio Analysis for AI Image Generation</h3>
                     </div>
                     <div class="card-body">
-                        <p class="card-text">Record or upload an audio file to analyze and generate AI image prompts</p>
-                        
+                        <p class="card-text">Speak or upload an audio file to analyze and generate AI image prompts</p>
+
                         <ul class="nav nav-tabs mb-3" id="inputTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="record-tab" data-bs-toggle="tab" data-bs-target="#record" type="button" role="tab">Record Audio</button>
+                                <button class="nav-link active" id="record-tab" data-bs-toggle="tab"
+                                    data-bs-target="#record" type="button" role="tab">Record Audio</button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button" role="tab">Upload Audio</button>
+                                <button class="nav-link" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload"
+                                    type="button" role="tab">Upload Audio</button>
                             </li>
                         </ul>
-                        
+
                         <div class="tab-content" id="inputTabsContent">
-                            <!-- Record Audio Tab -->
+                            <!-- Speech Recognition Tab -->
                             <div class="tab-pane fade show active" id="record" role="tabpanel">
                                 <div id="audioVisualization"></div>
                                 <div class="d-grid gap-2">
                                     <button id="recordButton" class="btn btn-primary btn-lg">
-                                        <i class="bi bi-mic-fill"></i> Start Recording
+                                        <i class="bi bi-mic-fill"></i> Start Listening
                                     </button>
                                 </div>
+                                <div id="transcriptDisplay">
+                                    <div id="final"></div>
+                                    <div id="interim"></div>
+                                </div>
                                 <p class="text-muted mt-2">
-                                    <small>Record an audio clip (up to 15 seconds)</small>
+                                    <small>Speak clearly for better recognition. Click stop when finished.</small>
                                 </p>
                             </div>
-                            
+
                             <!-- Upload Audio Tab -->
                             <div class="tab-pane fade" id="upload" role="tabpanel">
                                 <form id="uploadForm" enctype="multipart/form-data">
                                     <div class="mb-3">
                                         <label for="audioFile" class="form-label">Select Audio File</label>
-                                        <input class="form-control" type="file" id="audioFile" accept=".wav,.mp3,.ogg,.m4a">
+                                        <input class="form-control" type="file" id="audioFile"
+                                            accept=".wav,.mp3,.ogg,.m4a">
                                         <div class="form-text">Supported formats: WAV, MP3, OGG, M4A</div>
                                     </div>
                                     <div class="d-grid">
@@ -112,7 +153,7 @@
                                 </form>
                             </div>
                         </div>
-                        
+
                         <!-- Loading Indicator -->
                         <div id="loadingIndicator" class="text-center my-4">
                             <div class="spinner-border text-primary" role="status">
@@ -122,7 +163,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Results Section -->
                 <div id="resultsContainer" class="mt-4" style="display: none;">
                     <h4>Analysis Results</h4>
@@ -134,7 +175,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // DOM elements
             const recordButton = document.getElementById('recordButton');
             const uploadForm = document.getElementById('uploadForm');
@@ -143,17 +184,20 @@
             const resultsContainer = document.getElementById('resultsContainer');
             const resultsContent = document.getElementById('resultsContent');
             const audioVisualization = document.getElementById('audioVisualization');
-            
-            // Variables for recording
-            let mediaRecorder;
-            let audioChunks = [];
+            const finalTranscript = document.getElementById('final');
+            const interimTranscript = document.getElementById('interim');
+
+            // Variables for speech recognition
+            let recognition;
             let isRecording = false;
-            let audioContext;
-            let analyser;
+            let finalTranscriptText = '';
             let visualizerBars = [];
             let animationFrame;
-            
-            // Initialize audio visualization
+            let audioContext;
+            let analyser;
+            let microphone;
+
+            // Initialize visualization
             function initAudioVisualization() {
                 // Create bars for visualization
                 audioVisualization.innerHTML = '';
@@ -167,49 +211,37 @@
                     visualizerBars.push(bar);
                 }
             }
-            
+
             // Visualize audio function
             function visualizeAudio() {
                 if (!analyser) return;
-                
+
                 const bufferLength = analyser.frequencyBinCount;
                 const dataArray = new Uint8Array(bufferLength);
                 analyser.getByteFrequencyData(dataArray);
-                
+
                 const step = Math.floor(bufferLength / visualizerBars.length);
-                
+
                 for (let i = 0; i < visualizerBars.length; i++) {
                     const value = dataArray[i * step];
                     const height = (value / 255) * audioVisualization.clientHeight;
                     visualizerBars[i].style.height = height + 'px';
                 }
-                
+
                 animationFrame = requestAnimationFrame(visualizeAudio);
             }
-            
-            // Setup audio recording
-            async function setupAudioRecording() {
+
+            // Setup audio visualization
+            async function setupAudioVisualization() {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     
                     // Setup audio context for visualization
                     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    const source = audioContext.createMediaStreamSource(stream);
                     analyser = audioContext.createAnalyser();
                     analyser.fftSize = 256;
-                    source.connect(analyser);
-                    
-                    mediaRecorder = new MediaRecorder(stream);
-                    
-                    mediaRecorder.ondataavailable = (event) => {
-                        audioChunks.push(event.data);
-                    };
-                    
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
-                        await submitAudioRecording(audioBlob);
-                        audioChunks = [];
-                    };
+                    microphone = audioContext.createMediaStreamSource(stream);
+                    microphone.connect(analyser);
                     
                     initAudioVisualization();
                     return true;
@@ -219,87 +251,143 @@
                     return false;
                 }
             }
-            
-            // Record button click handler
-            recordButton.addEventListener('click', async function() {
-                if (isRecording) {
-                    // Stop recording
-                    mediaRecorder.stop();
-                    isRecording = false;
-                    recordButton.classList.remove('recording');
-                    recordButton.innerHTML = '<i class="bi bi-mic-fill"></i> Start Recording';
-                    
-                    // Stop visualization
-                    cancelAnimationFrame(animationFrame);
-                    visualizerBars.forEach(bar => bar.style.height = '0px');
-                    
-                    loadingIndicator.style.display = 'block';
-                } else {
-                    // Start recording
-                    if (!mediaRecorder && !(await setupAudioRecording())) {
-                        return;
-                    }
-                    
-                    audioChunks = [];
-                    mediaRecorder.start();
+
+            // Initialize speech recognition
+            function initSpeechRecognition() {
+                // Check if speech recognition is supported
+                if (!('webkitSpeechRecognition' in window)) {
+                    alert('Your browser does not support speech recognition. Please try Chrome.');
+                    return false;
+                }
+
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'th-TH'; // Set language
+
+                recognition.onstart = function() {
                     isRecording = true;
                     recordButton.classList.add('recording');
-                    recordButton.innerHTML = '<i class="bi bi-stop-fill"></i> Stop Recording';
+                    recordButton.innerHTML = '<i class="bi bi-stop-fill"></i> Stop Listening';
+                };
+
+                recognition.onend = function() {
+                    isRecording = false;
+                    recordButton.classList.remove('recording');
+                    recordButton.innerHTML = '<i class="bi bi-mic-fill"></i> Start Listening';
+                };
+
+                recognition.onresult = function(event) {
+                    let interim = '';
                     
-                    // Start visualization
-                    visualizeAudio();
-                    
-                    // Auto-stop after 15 seconds
-                    setTimeout(() => {
-                        if (isRecording) {
-                            recordButton.click();
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            finalTranscriptText += event.results[i][0].transcript + ' ';
+                        } else {
+                            interim += event.results[i][0].transcript;
                         }
-                    }, 15000);
+                    }
+                    
+                    finalTranscript.textContent = finalTranscriptText;
+                    interimTranscript.textContent = interim;
+                };
+
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    if (event.error === 'no-speech') {
+                        alert('No speech detected. Please try again.');
+                    }
+                    stopRecording();
+                };
+
+                return true;
+            }
+
+            // Start recording function
+            async function startRecording() {
+                if (!recognition && !initSpeechRecognition()) {
+                    return;
+                }
+
+                if (!analyser && !(await setupAudioVisualization())) {
+                    return;
+                }
+
+                finalTranscriptText = '';
+                finalTranscript.textContent = '';
+                interimTranscript.textContent = '';
+                
+                recognition.start();
+                visualizeAudio();
+            }
+
+            // Stop recording function
+            function stopRecording() {
+                if (recognition) {
+                    recognition.stop();
+                }
+                
+                cancelAnimationFrame(animationFrame);
+                visualizerBars.forEach(bar => bar.style.height = '0px');
+                
+                if (finalTranscriptText.trim()) {
+                    submitTranscript(finalTranscriptText);
+                }
+            }
+
+            // Record button click handler
+            recordButton.addEventListener('click', function() {
+                if (isRecording) {
+                    stopRecording();
+                } else {
+                    startRecording();
                 }
             });
-            
-            // Submit recorded audio
-            async function submitAudioRecording(audioBlob) {
-                const formData = new FormData();
-                formData.append("file", audioBlob, "recorded_audio.mp3");
+
+            // Submit transcript to backend
+            async function submitTranscript(transcript) {
+                loadingIndicator.style.display = 'block';
+                resultsContainer.style.display = 'none';
 
                 try {
-                    const response = await fetch("/upload", {
-                        method: "POST",
-                        body: formData,
+                    const response = await fetch('/record', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ transcript })
                     });
 
                     const data = await response.json();
                     displayResults(data);
                 } catch (error) {
-                    console.error("Error:", error);
-                    alert("Error analyzing audio. Please try again.");
-                    loadingIndicator.style.display = "none";
+                    console.error('Error:', error);
+                    alert('Error analyzing speech. Please try again.');
+                    loadingIndicator.style.display = 'none';
                 }
             }
 
-            
             // Upload form submit handler
             uploadForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-                
+
                 if (!audioFileInput.files[0]) {
                     alert('Please select an audio file.');
                     return;
                 }
-                
+
                 loadingIndicator.style.display = 'block';
                 resultsContainer.style.display = 'none';
-                
+
                 const formData = new FormData();
                 formData.append('file', audioFileInput.files[0]);
-                
+
                 try {
                     const response = await fetch('/upload', {
                         method: 'POST',
                         body: formData
                     });
-                    
+
                     const data = await response.json();
                     displayResults(data);
                 } catch (error) {
@@ -308,11 +396,11 @@
                     loadingIndicator.style.display = 'none';
                 }
             });
-            
+
             // Display results function
             function displayResults(data) {
                 console.log(data);
-                
+
                 loadingIndicator.style.display = "none";
                 resultsContainer.style.display = "block";
                 resultsContent.innerHTML = "";
@@ -322,52 +410,51 @@
                     return;
                 }
 
-                // const emotion = data[0]?.label || "Unknown";
-                // const confidence = data[0]?.score || 0;
-
                 resultsContent.innerHTML = `
                     <div class="alert alert-info">
                         <div class="mt-3">
                             <div class="mb-2">text wav2vec2</div>
                             <div class="mb-2">
-                                <h2>${data.wav2vec2}</h2>
+                                <h2>${data.wav2vec2 || data.transcript || "Not available"}</h2>
                             </div>
                             <div class="mb-2">text whisper</div>
                             <div class="mb-2">
-                                <h2>${data.whisper}</h2>
+                                <h2>${data.whisper || "Not available"}</h2>
                             </div>
                             <h5>Emotion Probabilities</h5>
                             <div class="mb-2">Anger</div>
                             <div class="progress mb-2">
-                                <div class="progress-bar bg-danger" style="width: ${(data.probabilities.anger*100).toFixed(1)}%;">${(data.probabilities.anger*100).toFixed(1)}%</div>
+                                <div class="progress-bar bg-danger" style="width: ${((data.probabilities?.anger || 0) * 100).toFixed(1)}%;">${((data.probabilities?.anger || 0) * 100).toFixed(1)}%</div>
                             </div>
                                
                             <div class="mb-2">frustration</div>
                             <div class="progress mb-2">
-                                <div class="progress-bar bg-dark" style="width: ${(data.probabilities.frustration*100).toFixed(1)}%;">${(data.probabilities.frustration*100).toFixed(1)}%</div>
+                                <div class="progress-bar bg-dark" style="width: ${((data.probabilities?.frustration || 0) * 100).toFixed(1)}%;">${((data.probabilities?.frustration || 0) * 100).toFixed(1)}%</div>
                             </div>
                             
                             <div class="mb-2">happiness</div>
                             <div class="progress mb-2">
-                                <div class="progress-bar bg-success" style="width: ${(data.probabilities.happiness*100).toFixed(1)}%;">${(data.probabilities.happiness*100).toFixed(1)}%</div>
+                                <div class="progress-bar bg-success" style="width: ${((data.probabilities?.happiness || 0) * 100).toFixed(1)}%;">${((data.probabilities?.happiness || 0) * 100).toFixed(1)}%</div>
                             </div>
                             
                             <div class="mb-2">neutral</div>
                             <div class="progress mb-2">
-                                <div class="progress-bar bg-secondary" style="width: ${(data.probabilities.neutral*100).toFixed(1)}%;">${(data.probabilities.neutral*100).toFixed(1)}%</div>
+                                <div class="progress-bar bg-secondary" style="width: ${((data.probabilities?.neutral || 0) * 100).toFixed(1)}%;">${((data.probabilities?.neutral || 0) * 100).toFixed(1)}%</div>
                             </div>
                             
                             <div class="mb-2">sadness</div>
                             <div class="progress mb-2">
-                                <div class="progress-bar bg-info" style="width: ${(data.probabilities.sadness*100).toFixed(1)}%;">${(data.probabilities.sadness*100).toFixed(1)}%</div>
+                                <div class="progress-bar bg-info" style="width: ${((data.probabilities?.sadness || 0) * 100).toFixed(1)}%;">${((data.probabilities?.sadness || 0) * 100).toFixed(1)}%</div>
                             </div>
-                            
-        
                         </div>
                     </div>
                 `;
             }
+
+            // Initialize visualization
+            initAudioVisualization();
         });
     </script>
 </body>
+
 </html>

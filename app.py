@@ -10,6 +10,29 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 def home():
     return render_template("index.html")
 
+@app.route("/record", methods=["POST"])
+def record_audio():
+    try:
+        # Get the transcript data from the JSON request
+        data = request.get_json()
+        transcript = data.get('transcript', '')
+        
+        # Print the received transcript to the terminal
+        print(f"Received speech transcript: {transcript}")
+        
+
+        return jsonify({
+            "transcript": transcript,
+            "wav2vec2": transcript,  # Replace with actual model output
+            "whisper": transcript,   # Replace with actual model output
+        })
+    except Exception as e:
+        print(f"Error processing speech transcript: {str(e)}")
+        return jsonify({
+            "error": f"Error processing speech: {str(e)}"
+        }), 400
+    
+
 @app.route("/upload", methods=["POST"])
 def upload_audio():
     if "file" not in request.files:
