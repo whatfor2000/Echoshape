@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 import os
 from ThaiserEmotionModel import Thaiser
 from wav2vec2 import Speechtotext  
-# from whisper import inference
+# from whisper import Speechtotext
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 
