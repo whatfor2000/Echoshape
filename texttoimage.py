@@ -1,4 +1,5 @@
 # maybe use api ?
+# must use a better gpu for genarate image
 import torch
 from diffusers import StableDiffusionPipeline
 

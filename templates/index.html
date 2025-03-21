@@ -144,7 +144,7 @@
                                     <div class="mb-3">
                                         <label for="audioFile" class="form-label">Select Audio File</label>
                                         <input class="form-control" type="file" id="audioFile"
-                                            accept=".wav,.mp3,.ogg,.m4a">
+                                            accept=".wav,.mp3,">
                                         <div class="form-text">Supported formats: WAV, MP3, OGG, M4A</div>
                                     </div>
                                     <div class="d-grid">
@@ -413,14 +413,11 @@
                 resultsContent.innerHTML = `
                     <div class="alert alert-info">
                         <div class="mt-3">
-                            <div class="mb-2">text wav2vec2</div>
+                            <div class="mb-2">Transcript</div>
                             <div class="mb-2">
-                                <h2>${data.wav2vec2 || data.transcript || "Not available"}</h2>
+                                <h2>${data.transcript || "Not available"}</h2>
                             </div>
-                            <div class="mb-2">text whisper</div>
-                            <div class="mb-2">
-                                <h2>${data.whisper || "Not available"}</h2>
-                            </div>
+
                             <h5>Emotion Probabilities</h5>
                             <div class="mb-2">Anger</div>
                             <div class="progress mb-2">
