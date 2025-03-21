@@ -34,6 +34,7 @@ source venv/bin/activate
 ### 3. Install Dependencies
 Use the following command to install all required Python libraries:
 ```sh
+pip install perchance
 pip install -r requirements.txt
 ```
 

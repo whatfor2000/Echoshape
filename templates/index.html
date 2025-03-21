@@ -82,18 +82,19 @@
             opacity: 1;
         }
 
-        #transcriptDisplay {
+        #audioPlayer {
+            width: 100%;
             margin-top: 1rem;
-            padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            border: 1px solid #dee2e6;
-            min-height: 60px;
         }
 
-        #interim {
-            color: #6c757d;
-            font-style: italic;
+        #recordingControls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #recordingControls button {
+            flex: 1;
         }
     </style>
 </head>
@@ -121,20 +122,24 @@
                         </ul>
 
                         <div class="tab-content" id="inputTabsContent">
-                            <!-- Speech Recognition Tab -->
+                            <!-- Record Audio Tab -->
                             <div class="tab-pane fade show active" id="record" role="tabpanel">
                                 <div id="audioVisualization"></div>
-                                <div class="d-grid gap-2">
+                                <div id="recordingControls">
                                     <button id="recordButton" class="btn btn-primary btn-lg">
-                                        <i class="bi bi-mic-fill"></i> Start Listening
+                                        <i class="bi bi-mic-fill"></i> Record
+                                    </button>
+                                    <button id="pauseButton" class="btn btn-warning btn-lg" disabled>
+                                        Pause
+                                    </button>
+                                    <button id="stopButton" class="btn btn-danger btn-lg" disabled>
+                                        Stop
                                     </button>
                                 </div>
-                                <div id="transcriptDisplay">
-                                    <div id="final"></div>
-                                    <div id="interim"></div>
-                                </div>
+                                <div id="formats" class="small text-muted mb-3">Format: Start recording to see sample rate</div>
+                                <audio id="audioPlayer" controls></audio>
                                 <p class="text-muted mt-2">
-                                    <small>Speak clearly for better recognition. Click stop when finished.</small>
+                                    <small>Speak clearly for better results. Press stop when finished to analyze.</small>
                                 </p>
                             </div>
 
@@ -143,8 +148,7 @@
                                 <form id="uploadForm" enctype="multipart/form-data">
                                     <div class="mb-3">
                                         <label for="audioFile" class="form-label">Select Audio File</label>
-                                        <input class="form-control" type="file" id="audioFile"
-                                            accept=".wav,.mp3,">
+                                        <input class="form-control" type="file" id="audioFile" accept=".wav,.mp3,.ogg,.m4a">
                                         <div class="form-text">Supported formats: WAV, MP3, OGG, M4A</div>
                                     </div>
                                     <div class="d-grid">
@@ -174,28 +178,31 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.rawgit.com/mattdiamond/Recorderjs/08e7abd9/dist/recorder.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // DOM elements
             const recordButton = document.getElementById('recordButton');
+            const pauseButton = document.getElementById('pauseButton');
+            const stopButton = document.getElementById('stopButton');
             const uploadForm = document.getElementById('uploadForm');
             const audioFileInput = document.getElementById('audioFile');
             const loadingIndicator = document.getElementById('loadingIndicator');
             const resultsContainer = document.getElementById('resultsContainer');
             const resultsContent = document.getElementById('resultsContent');
             const audioVisualization = document.getElementById('audioVisualization');
-            const finalTranscript = document.getElementById('final');
-            const interimTranscript = document.getElementById('interim');
+            const audioPlayer = document.getElementById('audioPlayer');
+            const formatsDisplay = document.getElementById('formats');
 
-            // Variables for speech recognition
-            let recognition;
-            let isRecording = false;
-            let finalTranscriptText = '';
-            let visualizerBars = [];
-            let animationFrame;
-            let audioContext;
-            let analyser;
-            let microphone;
+            // Variables for recording
+            let gumStream;           // Stream from getUserMedia()
+            let rec;                 // Recorder.js object
+            let input;               // MediaStreamAudioSourceNode
+            let audioContext;        // AudioContext
+            let analyser;            // AnalyserNode for visualization
+            let visualizerBars = []; // Array to hold visualization bars
+            let animationFrame;      // For visualization animation
+            let recordedBlob;        // To store the recorded audio blob
 
             // Initialize visualization
             function initAudioVisualization() {
@@ -231,185 +238,165 @@
                 animationFrame = requestAnimationFrame(visualizeAudio);
             }
 
-            // Setup audio visualization
-            async function setupAudioVisualization() {
-                try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    
-                    // Setup audio context for visualization
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    analyser = audioContext.createAnalyser();
-                    analyser.fftSize = 256;
-                    microphone = audioContext.createMediaStreamSource(stream);
-                    microphone.connect(analyser);
-                    
-                    initAudioVisualization();
-                    return true;
-                } catch (err) {
-                    console.error('Error accessing microphone:', err);
-                    alert('Could not access microphone. Please check permissions.');
-                    return false;
-                }
-            }
-
-            // Initialize speech recognition
-            function initSpeechRecognition() {
-                // Check if speech recognition is supported
-                if (!('webkitSpeechRecognition' in window)) {
-                    alert('Your browser does not support speech recognition. Please try Chrome.');
-                    return false;
-                }
-
-                recognition = new webkitSpeechRecognition();
-                recognition.continuous = true;
-                recognition.interimResults = true;
-                recognition.lang = 'th-TH'; // Set language
-
-                recognition.onstart = function() {
-                    isRecording = true;
-                    recordButton.classList.add('recording');
-                    recordButton.innerHTML = '<i class="bi bi-stop-fill"></i> Stop Listening';
-                };
-
-                recognition.onend = function() {
-                    isRecording = false;
-                    recordButton.classList.remove('recording');
-                    recordButton.innerHTML = '<i class="bi bi-mic-fill"></i> Start Listening';
-                };
-
-                recognition.onresult = function(event) {
-                    let interim = '';
-                    
-                    for (let i = event.resultIndex; i < event.results.length; i++) {
-                        if (event.results[i].isFinal) {
-                            finalTranscriptText += event.results[i][0].transcript + ' ';
-                        } else {
-                            interim += event.results[i][0].transcript;
-                        }
-                    }
-                    
-                    finalTranscript.textContent = finalTranscriptText;
-                    interimTranscript.textContent = interim;
-                };
-
-                recognition.onerror = function(event) {
-                    console.error('Speech recognition error:', event.error);
-                    if (event.error === 'no-speech') {
-                        alert('No speech detected. Please try again.');
-                    }
-                    stopRecording();
-                };
-
-                return true;
-            }
-
             // Start recording function
-            async function startRecording() {
-                if (!recognition && !initSpeechRecognition()) {
-                    return;
-                }
-
-                if (!analyser && !(await setupAudioVisualization())) {
-                    return;
-                }
-
-                finalTranscriptText = '';
-                finalTranscript.textContent = '';
-                interimTranscript.textContent = '';
+            function startRecording() {
+                // Reset UI
+                recordButton.classList.add('recording');
+                recordButton.disabled = true;
+                pauseButton.disabled = false;
+                stopButton.disabled = false;
                 
-                recognition.start();
-                visualizeAudio();
+                // Get audio stream
+                const constraints = { audio: true, video: false };
+                
+                navigator.mediaDevices.getUserMedia(constraints)
+                    .then(function(stream) {
+                        // Create audio context
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        
+                        // Update format display
+                        formatsDisplay.innerHTML = "Format: 1 channel pcm @ " + audioContext.sampleRate / 1000 + "kHz";
+                        
+                        // Create analyser for visualization
+                        analyser = audioContext.createAnalyser();
+                        analyser.fftSize = 256;
+                        
+                        // Store stream
+                        gumStream = stream;
+                        
+                        // Create input source and connect to analyser
+                        input = audioContext.createMediaStreamSource(stream);
+                        input.connect(analyser);
+                        
+                        // Create recorder
+                        rec = new Recorder(input, { numChannels: 1 });
+                        
+                        // Start recording
+                        rec.record();
+                        
+                        // Start visualization
+                        visualizeAudio();
+                    })
+                    .catch(function(err) {
+                        console.error("Error accessing microphone:", err);
+                        alert("Could not access microphone. Please check permissions.");
+                        recordButton.disabled = false;
+                        pauseButton.disabled = true;
+                        stopButton.disabled = true;
+                    });
+            }
+
+            // Pause recording function
+            function pauseRecording() {
+                if (rec.recording) {
+                    // Pause
+                    rec.stop();
+                    pauseButton.innerHTML = "Resume";
+                } else {
+                    // Resume
+                    rec.record();
+                    pauseButton.innerHTML = "Pause";
+                }
             }
 
             // Stop recording function
             function stopRecording() {
-                if (recognition) {
-                    recognition.stop();
-                }
+                // Update UI
+                stopButton.disabled = true;
+                recordButton.disabled = false;
+                pauseButton.disabled = true;
+                pauseButton.innerHTML = "Pause";
+                recordButton.classList.remove('recording');
                 
+                // Stop recording
+                rec.stop();
+                
+                // Stop stream tracks
+                gumStream.getAudioTracks()[0].stop();
+                
+                // Stop visualization
                 cancelAnimationFrame(animationFrame);
                 visualizerBars.forEach(bar => bar.style.height = '0px');
                 
-                if (finalTranscriptText.trim()) {
-                    submitTranscript(finalTranscriptText);
-                }
+                // Create and handle WAV blob
+                rec.exportWAV(function(blob) {
+                    recordedBlob = blob;
+                    
+                    // Set up audio player
+                    const url = URL.createObjectURL(blob);
+                    audioPlayer.src = url;
+                    
+                    // Automatically analyze audio
+                    analyzeRecording(blob);
+                });
             }
 
-            // Record button click handler
-            recordButton.addEventListener('click', function() {
-                if (isRecording) {
-                    stopRecording();
-                } else {
-                    startRecording();
-                }
-            });
-
-            // Submit transcript to backend
-            async function submitTranscript(transcript) {
+            // Analyze the recording
+            function analyzeRecording(blob) {
                 loadingIndicator.style.display = 'block';
                 resultsContainer.style.display = 'none';
-
-                try {
-                    const response = await fetch('/record', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ transcript })
-                    });
-
-                    const data = await response.json();
+                
+                const formData = new FormData();
+                formData.append('file', blob, 'recording.wav');
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
                     displayResults(data);
-                } catch (error) {
+                })
+                .catch(error => {
                     console.error('Error:', error);
-                    alert('Error analyzing speech. Please try again.');
+                    alert('Error analyzing audio. Please try again.');
                     loadingIndicator.style.display = 'none';
-                }
+                });
             }
 
             // Upload form submit handler
-            uploadForm.addEventListener('submit', async function(e) {
+            uploadForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-
+                
                 if (!audioFileInput.files[0]) {
                     alert('Please select an audio file.');
                     return;
                 }
-
+                
                 loadingIndicator.style.display = 'block';
                 resultsContainer.style.display = 'none';
-
+                
                 const formData = new FormData();
                 formData.append('file', audioFileInput.files[0]);
-
-                try {
-                    const response = await fetch('/upload', {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const data = await response.json();
+                
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
                     displayResults(data);
-                } catch (error) {
+                })
+                .catch(error => {
                     console.error('Error:', error);
                     alert('Error analyzing audio. Please try again.');
                     loadingIndicator.style.display = 'none';
-                }
+                });
             });
 
             // Display results function
             function displayResults(data) {
                 console.log(data);
-
+                
                 loadingIndicator.style.display = "none";
                 resultsContainer.style.display = "block";
                 resultsContent.innerHTML = "";
-
+                
                 if (data.error) {
                     resultsContent.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
                     return;
                 }
-
+                
                 resultsContent.innerHTML = `
                     <div class="alert alert-info">
                         <div class="mt-3">
@@ -424,22 +411,22 @@
                                 <div class="progress-bar bg-danger" style="width: ${((data.probabilities?.anger || 0) * 100).toFixed(1)}%;">${((data.probabilities?.anger || 0) * 100).toFixed(1)}%</div>
                             </div>
                                
-                            <div class="mb-2">frustration</div>
+                            <div class="mb-2">Frustration</div>
                             <div class="progress mb-2">
                                 <div class="progress-bar bg-dark" style="width: ${((data.probabilities?.frustration || 0) * 100).toFixed(1)}%;">${((data.probabilities?.frustration || 0) * 100).toFixed(1)}%</div>
                             </div>
                             
-                            <div class="mb-2">happiness</div>
+                            <div class="mb-2">Happiness</div>
                             <div class="progress mb-2">
                                 <div class="progress-bar bg-success" style="width: ${((data.probabilities?.happiness || 0) * 100).toFixed(1)}%;">${((data.probabilities?.happiness || 0) * 100).toFixed(1)}%</div>
                             </div>
                             
-                            <div class="mb-2">neutral</div>
+                            <div class="mb-2">Neutral</div>
                             <div class="progress mb-2">
                                 <div class="progress-bar bg-secondary" style="width: ${((data.probabilities?.neutral || 0) * 100).toFixed(1)}%;">${((data.probabilities?.neutral || 0) * 100).toFixed(1)}%</div>
                             </div>
                             
-                            <div class="mb-2">sadness</div>
+                            <div class="mb-2">Sadness</div>
                             <div class="progress mb-2">
                                 <div class="progress-bar bg-info" style="width: ${((data.probabilities?.sadness || 0) * 100).toFixed(1)}%;">${((data.probabilities?.sadness || 0) * 100).toFixed(1)}%</div>
                             </div>
@@ -447,6 +434,11 @@
                     </div>
                 `;
             }
+
+            // Event listeners
+            recordButton.addEventListener('click', startRecording);
+            pauseButton.addEventListener('click', pauseRecording);
+            stopButton.addEventListener('click', stopRecording);
 
             // Initialize visualization
             initAudioVisualization();

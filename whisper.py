@@ -8,7 +8,7 @@ processor = WhisperProcessor.from_pretrained("juierror/whisper-base-thai", langu
 
 path = "test/0Anger.wav"
 
-def inference(path: str) -> str:
+def Speechtotext(path: str) -> str:
     """
     Get the transcription from audio path
 

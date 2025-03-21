@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import os
 from ThaiserEmotionModel import Thaiser
-# from wav2vec2 import Speechtotext  
-from whisper import inference
+from wav2vec2 import Speechtotext  
+# from whisper import inference
 app = Flask(__name__, template_folder="templates", static_folder="static")
 
 
@@ -10,28 +10,8 @@ app = Flask(__name__, template_folder="templates", static_folder="static")
 def home():
     return render_template("index.html")
 
-@app.route("/record", methods=["POST"])
-def record_audio():
-    try:
-        # Get the transcript data from the JSON request
-        data = request.get_json()
-        transcript = data.get('transcript', '')
-        
-        # Print the received transcript to the terminal
-        print(f"Received speech transcript: {transcript}")
-        
 
-        return jsonify({
-            "transcript": transcript,
-            "wav2vec2": transcript,  # Replace with actual model output
-            "whisper": transcript,   # Replace with actual model output
-        })
-    except Exception as e:
-        print(f"Error processing speech transcript: {str(e)}")
-        return jsonify({
-            "error": f"Error processing speech: {str(e)}"
-        }), 400
-    
+
 
 @app.route("/upload", methods=["POST"])
 def upload_audio():
@@ -71,7 +51,7 @@ def upload_audio():
         resultemotion = Thaiser(audio_path)
         print("=====================================")
         print(resultemotion)
-        resultText = inference(audio_path)
+        resultText = Speechtotext(audio_path)
         print("=====================================")
         # Remove the file after processing
         os.remove(audio_path)
