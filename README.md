@@ -13,7 +13,7 @@ Make sure you have the following installed:
 ### 1. Clone the Repository
 First, download the project files by running:
 ```sh
-git clone https://github.com/whatfor2000/Echoshape/tree/Prototype_v2
+git clone https://github.com/whatfor2000/Echoshape
 cd Echoshape
 ```
 
@@ -34,7 +34,6 @@ source venv/bin/activate
 ### 3. Install Dependencies
 Use the following command to install all required Python libraries:
 ```sh
-pip install perchance
 pip install -r requirements.txt
 ```
 
