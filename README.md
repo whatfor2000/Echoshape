@@ -61,7 +61,7 @@ Once the dependencies are installed, you can run the React + Vite application wi
 npm run dev
 ```
 
-### Build React + Vite for Production
+### Build React + Vite for Production (for build)
 If you need to create a production build for the React app, run:
 
 ```sh
