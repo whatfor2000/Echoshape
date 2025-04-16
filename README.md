@@ -44,6 +44,30 @@ python app.py
 ```
 By default, the app runs on `http://127.0.0.1:5000/`
 
+## 5. Setup React + Vite (Frontend)
+
+### Install Dependencies
+After installing Python dependencies and following the previous steps,New terminal go into the `Frontend` folder and install the dependencies for React + Vite:
+
+```sh
+cd Frontend
+npm install
+```
+
+### Run React + Vite
+Once the dependencies are installed, you can run the React + Vite application with the following command:
+
+```sh
+npm run dev
+```
+
+### Build React + Vite for Production
+If you need to create a production build for the React app, run:
+
+```sh
+npm run build
+```
+
 ## Updating Dependencies
 If you install new dependencies, update the `requirements.txt` file by running:
 ```sh
@@ -56,3 +80,4 @@ pip freeze > requirements.txt
   pip install -r requirements.txt --no-cache-dir
   ```
 - If you have problems with virtual environments, ensure it is activated before running any commands.
+
