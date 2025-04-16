@@ -7,6 +7,7 @@ Make sure you have the following installed:
 - pip (Python package manager)
 - Git (for cloning the repository)
 - Virtual environment (recommended)
+- NOdejs [click to download](https://nodejs.org/en)
 
 ## Installation Steps
 
