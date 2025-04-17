@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import os
 from ThaiserEmotionModel import Thaiser
-from wav2vec2 import Speechtotext  
-# from whisper import Speechtotext
+# from wav2vec2 import Speechtotext  
+from whisper import Speechtotext
 # from sr import Speechtotext
 from imagegen import generate_image
 from flask_cors import CORS
