@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import os
 from ThaiserEmotionModel import Thaiser
-from wav2vec2 import Speechtotext  
-# from whisper import Speechtotext
+# from wav2vec2 import Speechtotext  
+from whisper import Speechtotext
 # from sr import Speechtotext
 from imagegen import generate_image
 from flask_cors import CORS
@@ -21,12 +21,12 @@ def upload_audio():
     audio_file = request.files["file"]
     
     # Check if transcript was provided by client
-    client_transcript = request.form.get("transcript", "")
+    # client_transcript = request.form.get("transcript", "")
     
     # Debug: print file details
     print(f"Filename: {audio_file.filename}")
     print(f"Content Type: {audio_file.content_type}")
-    print(f"Client Transcript: {client_transcript if client_transcript else 'Not provided'}")
+    # print(f"Client Transcript: {client_transcript if client_transcript else 'Not provided'}")
     
     # Ensure the uploads directory exists
     os.makedirs("uploads", exist_ok=True)
@@ -55,12 +55,12 @@ def upload_audio():
         print(resultemotion)
         
         # Use client transcript if available, otherwise use speech-to-text
-        if client_transcript:
-            resultText = client_transcript
-            print("Using client-side transcript")
-        else:
-            resultText = Speechtotext(audio_path)
-            print("Using server-side speech-to-text")
+        # if client_transcript:
+        #     resultText = client_transcript
+        #     print("Using client-side transcript")
+        # else:
+        resultText = Speechtotext(audio_path)
+        print("Using server-side speech-to-text")
         
         print("=====================================")
         print(f"Transcript: {resultText}")

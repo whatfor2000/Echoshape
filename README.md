@@ -7,6 +7,7 @@ Make sure you have the following installed:
 - pip (Python package manager)
 - Git (for cloning the repository)
 - Virtual environment (recommended)
+- Nodejs [click to download](https://nodejs.org/en)
 
 ## Installation Steps
 
@@ -61,7 +62,7 @@ Once the dependencies are installed, you can run the React + Vite application wi
 npm run dev
 ```
 
-### Build React + Vite for Production
+### Build React + Vite for Production (for build)
 If you need to create a production build for the React app, run:
 
 ```sh
