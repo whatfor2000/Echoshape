@@ -28,7 +28,7 @@ const EmotionBar: React.FC<EmotionBarProps> = ({ emotion, value, color, emoji })
       {/* Emoji + Emotion Label */}
       <Typography
         sx={{
-          fontFamily: 'Prompt',
+          fontFamily: 'Bebas Neue',
           fontWeight: 600,
           fontSize: '1rem',
           minWidth: '140px',
@@ -63,7 +63,7 @@ const EmotionBar: React.FC<EmotionBarProps> = ({ emotion, value, color, emoji })
       {/* Value (%) */}
       <Typography
         sx={{
-          fontFamily: 'Prompt',
+          fontFamily: 'Bebas Neue',
           fontWeight: 'bold',
           fontSize: '0.9rem',
           color: '#000',

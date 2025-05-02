@@ -55,9 +55,9 @@ const AudioUpload: React.FC<Props> = ({ onResult }) => {
     cursor: 'pointer',
     marginTop: 2,
     color: 'white',
-    fontFamily: 'Prompt',
+    fontFamily: 'Bebas Neue',
     fontWeight: 'bold',
-    fontSize: '1.1rem',
+    fontSize: '1.3rem',
     borderRadius: '25px',
     paddingX: 3,
     paddingY: 1,
@@ -90,16 +90,16 @@ const AudioUpload: React.FC<Props> = ({ onResult }) => {
           textAlign: 'center',
         }}
       >
-        <Typography
-          variant="h6"
-          sx={{
-            fontWeight: 'bold',
-            color: '#fff',
-            fontFamily: 'Prompt',
-            textAlign: 'start',
-          }}
+       <Typography
+               sx={{
+                 fontSize:"1.4rem",
+                 fontWeight: 'bold',
+                 color: '#fff',
+                 fontFamily: 'Bebas Neue',
+                 textAlign: 'start',
+               }}
         >
-          Upload & Play Audio
+          Upload & Play Audio (Only Thai language is supported)
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -134,7 +134,7 @@ const AudioUpload: React.FC<Props> = ({ onResult }) => {
           <Box sx={{ marginTop: 4 }}>
             <Typography
               variant="h6"
-              sx={{ fontFamily: 'Prompt', mb: 1, color: '#fff' }}
+              sx={{ fontFamily: 'Bebas Neue', mb: 1, color: '#fff' }}
             >
               Preview:
             </Typography>
@@ -157,14 +157,14 @@ const AudioUpload: React.FC<Props> = ({ onResult }) => {
             fontSize: "1.5rem",
             fontWeight: 'bold',
             color: '#000',
-            fontFamily: 'Prompt',
+            fontFamily: 'Bebas Neue',
             textAlign: 'start',
           }}
         >
           Live Script
         </Typography>
         <Typography variant="h6" sx={{
-          fontFamily: 'Prompt',
+          fontFamily: 'Bebas Neue',
           height: '200px',
           width: '100%',
           overflowY: 'auto',

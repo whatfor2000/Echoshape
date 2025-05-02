@@ -15,7 +15,7 @@ const Header: React.FC = () => {
   }
 
   const TextStyle = {
-    fontFamily: 'Prompt',
+    fontFamily: 'Bebas Neue',
     fontWeight: 'bold',
     fontSize: '1.1rem',
 }

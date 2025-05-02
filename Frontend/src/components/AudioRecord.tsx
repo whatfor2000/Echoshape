@@ -160,9 +160,9 @@ const handleUpload = async () => {
     boxShadow: 3,
     cursor: 'pointer',
     color: 'white',
-    fontFamily: 'Prompt',
+    fontFamily: 'Bebas Neue',
     fontWeight: 'bold',
-    fontSize: '1rem',
+    fontSize: '1.2rem',
     borderRadius: '25px',
     px: 4,
     py: 1.5,
@@ -188,6 +188,7 @@ const handleUpload = async () => {
           borderRadius: 4,
           width: '100%',
           backgroundColor: '#ffffff10',
+          
           backdropFilter: 'blur(10px)',
           textAlign: 'center',
         }}
@@ -197,11 +198,11 @@ const handleUpload = async () => {
             fontSize:"1.4rem",
             fontWeight: 'bold',
             color: '#fff',
-            fontFamily: 'Prompt',
+            fontFamily: 'Bebas Neue',
             textAlign: 'start',
           }}
         >
-          Audio Recorder
+          Audio Recorder (Only Thai language is supported)
         </Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
@@ -212,6 +213,7 @@ const handleUpload = async () => {
             sx={{
               backdropFilter: 'blur(30px)',
               ...ButtonStyle,
+              color: '#fff',
               background: 'linear-gradient(135deg,#00c853,#64dd17)',
               '&:hover': {
                 background: 'linear-gradient(135deg,#43a047,#00e676)',
@@ -223,10 +225,11 @@ const handleUpload = async () => {
 
           <Button
             variant="contained"
-            disabled={!isRecording}
+            // disabled={!isRecording}
             onClick={stopRecording}
             sx={{
               ...ButtonStyle,
+              color: '#fff',
               background: 'linear-gradient(135deg,#c62828,#ff7043)',
               '&:hover': {
                 background: 'linear-gradient(135deg,#b71c1c,#ff5722)',
@@ -299,14 +302,14 @@ const handleUpload = async () => {
                   fontSize: "1.5rem",
                   fontWeight: 'bold',
                   color: '#000',
-                  fontFamily: 'Prompt',
+                  fontFamily: 'Bebas Neue',
                   textAlign: 'start',
                 }}
               >
                 Live Script
               </Typography>
               <Typography variant="h6" sx={{
-                fontFamily: 'Prompt',
+                fontFamily: 'Bebas Neue',
                 height: '200px',
                 width: '100%',
                 overflowY: 'auto',

@@ -45,7 +45,7 @@ const About: React.FC = () => {
             textAlign: 'left',
             color: '#fff',
             fontSize: '3rem',
-            fontFamily: 'Prompt',
+            fontFamily: 'Bebas Neue',
             fontWeight: 'bold',
          
           }}
@@ -53,7 +53,7 @@ const About: React.FC = () => {
           About Us
         </Typography>
       <Box>
-              <Typography sx={{ textAlign: "left", marginTop: 2, fontSize:"1.5rem" , color:"#fff", fontFamily: 'Prompt' }}>
+              <Typography sx={{ textAlign: "left", marginTop: 2, fontSize:"1.5rem" , color:"#fff", fontFamily: 'Bebas Neue' }}>
               At Echoshape, we believe in the power of sound and data to create transformative digital experiences. <br />
               Our passion lies in reshaping how audio is understood and interacted with,<br />
               pushing the boundaries of technology to craft the most innovative and intuitive digital products.<br />
@@ -64,7 +64,7 @@ const About: React.FC = () => {
       </Box>
       <br /><br />
       <Box>
-              <Typography sx={{ textAlign: "left", marginTop: 2, fontSize:"1.5rem" , color:"#fff", fontFamily: 'Prompt' }}>
+              <Typography sx={{ textAlign: "left", marginTop: 2, fontSize:"1.5rem" , color:"#fff", fontFamily: 'Bebas Neue' }}>
               ที่ Echoshape เราเชื่อในพลังของเสียงและข้อมูลในการสร้างประสบการณ์ดิจิทัลที่เปลี่ยนแปลง <br />
               ความหลงใหลของเราคือการเปลี่ยนแปลงวิธีที่เสียงถูกเข้าใจและมีปฏิสัมพันธ์กับมัน <br />
               เราผลักดันขีดจำกัดของเทคโนโลยีเพื่อสร้างผลิตภัณฑ์ดิจิทัลที่เป็นนวัตกรรมและเข้าใจง่ายที่สุด <br />

@@ -12,7 +12,7 @@ const Home: React.FC = () => {
       </Typography>
 
       <Box>
-        <Typography sx={{ textAlign: "left", marginTop: 2, fontSize:"1.5rem" , color:"#fff", fontFamily: 'Prompt' }}>
+        <Typography sx={{ textAlign: "left", marginTop: 2, fontSize:"1.5rem" , color:"#fff", fontFamily: 'Bebas Neue' }}>
         Transform your voice into stunning Al-generated <br />
         soundscapes and visuals. Our technology makes it <br />
         easy to create immersive audio and visual <br />
@@ -30,7 +30,7 @@ const Home: React.FC = () => {
             margin: "10px",
             marginTop: 2,
             color: "white",
-            fontFamily: "Prompt",
+            fontFamily: 'Bebas Neue',
             fontWeight: "bold",
             borderRadius: "25px",
             "&:hover": {
@@ -39,7 +39,7 @@ const Home: React.FC = () => {
           }}
           variant="contained"
         >
-          <Typography variant="h6" sx={{ fontFamily: "Prompt", fontWeight: "bold" }}>
+          <Typography variant="h6" sx={{ fontFamily: 'Bebas Neue', fontWeight: "bold" }}>
             Get Started
           </Typography>
         </Button>
@@ -56,7 +56,7 @@ const Home: React.FC = () => {
             marginTop: 2,
             backgroundColor: "rgba(0,0,0,0)",
             color: "white",
-            fontFamily: "Prompt",
+            fontFamily: 'Bebas Neue',
             fontWeight: "bold",
             borderRadius: "25px", // เพิ่มให้เหมือนปุ่มแรก
             border: "1px solid white",
@@ -67,7 +67,7 @@ const Home: React.FC = () => {
           variant="contained"
         >
         
-          <Typography variant="h6" sx={{ fontFamily: "Prompt", fontWeight: "bold" }}>
+          <Typography variant="h6" sx={{ fontFamily: 'Bebas Neue', fontWeight: "bold" }}>
             Learn More About
           </Typography>
         

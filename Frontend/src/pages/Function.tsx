@@ -27,17 +27,17 @@ const Function: React.FC = () => {
 
   return (
     <Box sx={{ marginTop: '15px', paddingInline: '11vw', width: '78vw' }}>
-      <Typography variant="h5" sx={{ fontWeight: 'bold', marginBottom: 3, color: '#fff', fontFamily: 'Prompt' }}>
+      <Typography variant="h5" sx={{ fontWeight: 'bold', marginBottom: 3, color: '#fff', fontFamily: 'Bebas Neue' }}>
         Record or upload an audio file to analyze and generate AI image
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', md: 'row' } }}>
         {/* LEFT SIDE - Tabs with content */}
         <Box sx={{ width: { xs: '100%', md: '60%' } }}>
-          <Paper elevation={6} sx={{ backgroundColor: '#ffffff10', backdropFilter: 'blur(10px)', borderRadius: 2, overflow: 'hidden', paddingBottom: 2, fontFamily: 'Prompt' }}>
-            <Tabs value={tabIndex} onChange={handleTabChange} indicatorColor="secondary" textColor="inherit" variant="fullWidth" centered sx={{ color: 'white', backgroundColor: 'rgba(0,0,0,0.4)', borderBottom: '1px solid rgba(255,255,255,0.2)' }}>
-              <Tab label="Record Audio" />
-              <Tab label="Upload Audio" />
+          <Paper elevation={6} sx={{ backgroundColor: '#ffffff10', backdropFilter: 'blur(10px)', borderRadius: 2, overflow: 'hidden', paddingBottom: 2, fontFamily: 'Bebas Neue' }}>
+            <Tabs value={tabIndex} onChange={handleTabChange} indicatorColor="secondary" textColor="inherit" variant="fullWidth" centered sx={{ color: 'white', backgroundColor: 'rgba(0,0,0,0.4)', borderBottom: '1px solid rgba(255,255,255,0.2)',fontFamily: 'Bebas Neue' }}>
+              <Tab sx={{fontFamily: 'Bebas Neue',fontSize:"1.1rem"}} label="Record Audio" />
+              <Tab sx={{fontFamily: 'Bebas Neue',fontSize:"1.1rem"}} label="Upload Audio" />
             </Tabs>
 
             <Box>
@@ -51,6 +51,9 @@ const Function: React.FC = () => {
         <Box sx={{ backgroundColor: 'rgba(0, 0, 0, 0.3)', borderRadius: '10px', width: { xs: '100%', md: '40%' } ,height: '100%'}}>
           {result ? (
             <>
+              <Typography variant="h5" sx={{ mt:2,ml:2,fontWeight: 'bold', marginBottom: 3, color: '#fff', fontFamily: 'Bebas Neue' }}>
+                Analysis Results
+              </Typography>
               <ImageComponent height="240px" width="100%" src={result.image} alt="Generated" title="" />
               <Box sx={{ mt: 4, marginInline: "10px" }}>
                 <EmotionBar emoji="😠" emotion="Anger" value={result.probabilities.anger * 100} color="#d32f2f" />
@@ -61,7 +64,7 @@ const Function: React.FC = () => {
               </Box>
             </>
           ) : (
-            <Typography sx={{ p: 2, color: 'white' }}>No result yet.</Typography>
+            <Typography sx={{ p: 2, color: 'white', fontFamily: 'Bebas Neue',fontSize:"1.1rem" }}>No result yet.</Typography>
           )}
         </Box>
       </Box>
