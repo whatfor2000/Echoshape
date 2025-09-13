@@ -13,4 +13,15 @@ export class UsersService {
       where: { email: email }
     })
   }
+
+  async findById(id: string): Promise<Omit<User, 'password'> | null> {
+    return this.prisma.user.findFirst({
+      where: { id },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+      }
+    })
+  }
 }

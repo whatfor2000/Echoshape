@@ -10,10 +10,15 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     @Post('login')
     async login(@Request() req, @Res({ passthrough: true }) res: express.Response) {
-        const { access_token } = await this.authService.login(req.body);
-        res.cookie('access_token', access_token, {
-            httpOnly: true,
-        });
-        return { message: 'Successfully logged in' };
-    } 
+        try {
+            const { access_token } = await this.authService.login(req.body);
+            res.cookie('access_token', access_token, {
+                httpOnly: true,
+            });
+            return { success: true, access_token: access_token };
+
+        } catch (error) {
+            return { error: `Error ${error}` }
+        }
+    }
 }

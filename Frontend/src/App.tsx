@@ -4,6 +4,7 @@ import Home from './pages/Home'
 import Function from './pages/Function'
 import About from './pages/About'
 import { Box } from '@mui/material'
+import Login from './pages/Login'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/function" element={<Function />} />
           <Route path="/about" element={<About />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </Box>
     </Box>
