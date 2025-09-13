@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import os
+
+import flask
+
 from ThaiserEmotionModel import Thaiser
 # from wav2vec2 import Speechtotext  
 from whisper import Speechtotext
@@ -7,7 +10,56 @@ from whisper import Speechtotext
 from imagegen import generate_image
 from flask_cors import CORS
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = 'super secret string'
 CORS(app)
+
+import flask_login
+from flask_login import LoginManager, login_required
+login_manager = LoginManager() # Login manager for flask-login # New
+login_manager.init_app(app) # New
+
+class User(flask_login.UserMixin):
+    def __init__(self, email, password):
+        self.id = email
+        self.password = password
+
+users = {"leafstorm": User("leafstorm", "secret")}
+
+
+@login_manager.user_loader
+def user_loader(id):
+    return users.get(id)
+
+@app.get("/login")
+def loginGET():
+    return """<form method=post>
+      Email: <input name="email"><br>
+      Password: <input name="password" type=password><br>
+      <button>Log In</button>
+    </form>"""
+
+@app.post("/login")
+def login():
+    user = users.get(flask.request.form["email"])
+
+    if user is None or user.password != flask.request.form["password"]:
+        return flask.redirect(flask.url_for("login"))
+
+    flask_login.login_user(user)
+    return flask.redirect(flask.url_for("protected"))
+
+@app.route("/protected")
+@flask_login.login_required
+def protected():
+    return flask.render_template_string(
+        "Logged in as: {{ user.id }}",
+        user=flask_login.current_user
+    )
+
+@app.route("/logout")
+def logout():
+    flask_login.logout_user()
+    return "Logged out"
 
 @app.route("/")
 def home():
@@ -94,6 +146,6 @@ def upload_audio():
         return jsonify({
             "error": f"Error processing audio: {str(e)}"
         }), 500
-
+    
 if __name__ == "__main__":
     app.run(debug=True)
