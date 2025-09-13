@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Box, Typography, TextField, Button, CircularProgress } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
+import { useCookies } from 'react-cookie';
 
 // NOTE: This component assumes that Material-UI and a custom font like 'Bebas Neue'
 // are loaded in your main application's HTML file or theme configuration.
@@ -26,7 +27,8 @@ const theme = createTheme({
 });
 
 const Login = () => {
-    const  navigate = useNavigate()
+    const [cookies, setCookie] = useCookies(['access_token']);
+    const navigate = useNavigate()
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -50,11 +52,13 @@ const Login = () => {
 
             if (response.ok) {
                 if (data.success) {
-                    sessionStorage.setItem("access_token", data.access_token);
+                    // sessionStorage.setItem("access_token", data.access_token);
+                    setCookie('access_token', data.access_token,);
                     setMessage('Login successful!');
                     // You would typically redirect the user here or update state
                     setTimeout(() => {
                         navigate('/')
+                        window.location.reload();
                     }, 1500)
                 } else {
                     setMessage(`Login failed: ${data.message || 'Unknown error'}`);
@@ -202,6 +206,11 @@ const Login = () => {
                         {message}
                     </Typography>
                 )}
+                <Box mt={3} sx={{ textAlign: 'center' }}>
+                    <Button onClick={() => navigate('/register')} sx={{ color: 'text.secondary' }}>
+                        Don't have an account? register here.
+                    </Button>
+                </Box>
             </Box>
         </ThemeProvider>
     );

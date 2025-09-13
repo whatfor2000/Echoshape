@@ -7,8 +7,14 @@ import { PrismaService } from 'src/prisma.service';
 export class RegisterService {
   constructor(private prisma: PrismaService) { }
   async create(createRegisterDto: CreateRegisterDto) {
-    const res = await this.prisma.user.create({ data: createRegisterDto })
-    return res.id;
+    try {
+      const res = await this.prisma.user.create({ data: createRegisterDto })
+      return { success: true };
+
+    } catch (error) {
+      return { success: false, message: error };
+
+    }
   }
 
 }

@@ -1,8 +1,24 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import { AppBar, Toolbar, Typography, Box } from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { AppBar, Toolbar, Typography, Box, Button } from '@mui/material'
+import { useCookies } from 'react-cookie'
 
 const Header: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(false)
+  const [cookies, , removeCookie] = useCookies(['access_token'])
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    const token = cookies.access_token
+    setIsLogin(!!token)
+  }, [cookies])
+
+  const handleLogout = () => {
+    removeCookie('access_token')
+    setIsLogin(false)
+    navigate('/login')
+  }
+
   const linkStyle = {
     textDecoration: 'none',
     color: 'white',
@@ -11,33 +27,32 @@ const Header: React.FC = () => {
 
   const activeStyle = {
     fontWeight: 'bold',
-    color: '#FF0000', // สีทองเมื่อ active
+    color: '#FF0000',
   }
 
   const TextStyle = {
     fontFamily: 'Bebas Neue',
     fontWeight: 'bold',
     fontSize: '1.1rem',
-}
+  }
 
   return (
-    <AppBar position="static" sx={{ backgroundColor: 'rgba(0,0,0,0)', boxShadow: 'none', }}>
-      <Toolbar>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <AppBar position="static" sx={{ backgroundColor: 'rgba(0,0,0,0)', boxShadow: 'none' }}>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        
+        {/* Logo + Title */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <img src="./images/Logo.png" alt="Logo" style={{ width: '50px', height: '50px' }} />
-          <Typography variant="h6" sx={{ color: 'white',  fontWeight: 'bold',fontFamily: 'Bebas Neue', fontSize: '2rem', }}>
+          <Typography
+            variant="h6"
+            sx={{ color: 'white', fontWeight: 'bold', fontFamily: 'Bebas Neue', fontSize: '2rem' }}
+          >
             Echoshape
           </Typography>
         </Box>
-        <Box
-          sx={{
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            gap: 2,
-          }}
-        >
+
+        {/* Navigation Links */}
+        <Box sx={{ display: 'flex', gap: 2 }}>
           <NavLink
             to="/"
             style={({ isActive }) => ({
@@ -48,7 +63,7 @@ const Header: React.FC = () => {
             <Typography sx={TextStyle}>Home</Typography>
           </NavLink>
           <NavLink
-            to="/function"
+            to={isLogin ? "/function" : "/login"}
             style={({ isActive }) => ({
               ...linkStyle,
               ...(isActive ? activeStyle : {})
@@ -66,6 +81,20 @@ const Header: React.FC = () => {
             <Typography sx={TextStyle}>About</Typography>
           </NavLink>
         </Box>
+
+        {/* Login / Logout Button */}
+        <Box>
+          {isLogin ? (
+            <Button variant="contained" color="error" onClick={handleLogout}>
+              Logout
+            </Button>
+          ) : (
+            <Button variant="contained" color="primary" onClick={() => navigate('/login')}>
+              Login
+            </Button>
+          )}
+        </Box>
+
       </Toolbar>
     </AppBar>
   )
