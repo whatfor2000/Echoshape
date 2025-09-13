@@ -1,26 +1,33 @@
 # Echoshape
-
-
 ## Prerequisites
 Make sure you have the following installed:
+
 - Python (>= 3.7)
+
 - pip (Python package manager)
+
+- Node.js (>= 16.x) and npm (Node package manager)
+
 - Git (for cloning the repository)
-- Virtual environment (recommended)
-- Nodejs [click to download](https://nodejs.org/en)
 
 ## Installation Steps
-
 ### 1. Clone the Repository
 First, download the project files by running:
-```sh
+
+```bash
 git clone https://github.com/whatfor2000/Echoshape
 cd Echoshape
 ```
+### 2. Set Up the Python AI Service (AIService)
+This service handles the AI models and Flask API.
 
-### 2. Create and Activate a Virtual Environment
-Create a virtual environment to keep dependencies isolated:
-```sh
+#### Create and Activate a Virtual Environment
+It's recommended to create a virtual environment for the Python dependencies.
+
+```Bash
+# Navigate to the AIService directory
+cd AIService
+
 # Create virtual environment
 python -m venv venv
 
@@ -31,54 +38,76 @@ venv\Scripts\activate
 # On macOS/Linux:
 source venv/bin/activate
 ```
-
-### 3. Install Dependencies
+#### Install Dependencies
 Use the following command to install all required Python libraries:
-```sh
+```Bash
 pip install -r requirements.txt
 ```
-
-### 4. Run the Application
+#### Run the AIService
 Start the Flask application with:
-```sh
+
+```Bash
 python app.py
 ```
-By default, the app runs on `http://127.0.0.1:5000/`
+By default, the app runs on ```http://127.0.0.1:5000/```
 
-## 5. Setup React + Vite (Frontend)
+### 3. Set Up the NestJS Backend
+This service provides the main API for the frontend.
 
-### Install Dependencies
-After installing Python dependencies and following the previous steps,New terminal go into the `Frontend` folder and install the dependencies for React + Vite:
+#### Install Dependencies
+Open a new terminal and navigate to the ```backend``` folder to install its dependencies.
 
-```sh
-cd Frontend
+```Bash
+# Go back to the main Echoshape folder
+cd ..
+
+# Navigate to the backend directory
+cd backend
+
+# Install dependencies
 npm install
 ```
+#### Run the NestJS Backend
+Once the dependencies are installed, you can run the NestJS application with the following command:
 
-### Run React + Vite
+```Bash
+npm run start:dev
+```
+The NestJS server will typically run on ```http://localhost:3000/```
+
+### 4. Set Up the React + Vite Frontend
+This service handles the user interface.
+
+#### Install Dependencies
+Open another new terminal and navigate to the ```Frontend``` folder to install its dependencies.
+
+```Bash
+# Go back to the main Echoshape folder
+cd ..
+
+# Navigate to the Frontend directory
+cd Frontend
+
+# Install dependencies
+npm install
+```
+#### Run the React + Vite Frontend
 Once the dependencies are installed, you can run the React + Vite application with the following command:
 
-```sh
+```Bash
 npm run dev
 ```
-
-### Build React + Vite for Production (for build)
-If you need to create a production build for the React app, run:
-
-```sh
-npm run build
-```
+The frontend will typically run on http://localhost:5173/
 
 ## Updating Dependencies
-If you install new dependencies, update the `requirements.txt` file by running:
-```sh
+- For Python: If you install new dependencies, update the ```requirements.txt``` file by running:
+
+```Bash
 pip freeze > requirements.txt
 ```
+- For Node.js (Backend & Frontend): If you install a new dependency, it will automatically be added to ```package.json```. To update all packages, you can run ```npm update```.
 
 ## Troubleshooting
-- If you encounter issues with missing dependencies, try reinstalling them with:
-  ```sh
-  pip install -r requirements.txt --no-cache-dir
-  ```
-- If you have problems with virtual environments, ensure it is activated before running any commands.
+If you encounter issues with missing Python dependencies, ensure you're in the ```AIService``` directory and the virtual environment is activated before running ```pip install -r requirements.txt```.
 
+For Node.js-related issues, ensure you are in the correct ```backend``` or ```Frontend``` directory before running ```npm``` commands.
