@@ -10,6 +10,8 @@ Make sure you have the following installed:
 
 - Git (for cloning the repository)
 
+- postgresql Database
+
 ## Installation Steps
 ### 1. Clone the Repository
 First, download the project files by running:
@@ -67,6 +69,39 @@ cd backend
 # Install dependencies
 npm install
 ```
+
+
+#### Set Up Prisma with PostgreSQL
+1. Create a Database
+
+   - Open your PostgreSQL management tool (for example, Laragon with PostgreSQL, or pgAdmin).
+
+   - Create a new database named:
+    ```sql
+    CREATE DATABASE echoshape;
+    ```
+2. Update Prisma Configuration
+    Open the file ```backend/prisma/schema.prisma```and check the ```datasource``` block.
+    Replace the connection URL with your PostgreSQL settings:
+    ```prisma
+    datasource db {
+        provider = "postgresql"
+        url      = env("DATABASE_URL")
+    }
+    ```
+    Then open ```backend/.env``` and add/update: (yuou can see example in `backend/.env-example`)
+    ```env
+    DATABASE_URL="postgresql://postgres:your_password@localhost:5432/echoshape"
+    ```
+    >⚠️ Replace ```postgres``` and ```your_password``` with your actual PostgreSQL username and password
+3. Run Initial Migration
+
+    After the database is created and .env is configured, run:
+    ```
+    npx prisma migrate dev 
+    ```
+    This will create the necessary tables in the echoshape database and generate the Prisma client.
+
 #### Run the NestJS Backend
 Once the dependencies are installed, you can run the NestJS application with the following command:
 
