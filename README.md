@@ -100,6 +100,8 @@ npm install
     ```
     npx prisma migrate dev 
     ```
+    > if the you connect to new database, you must delete `prisma/migrations` folder
+
     This will create the necessary tables in the echoshape database and generate the Prisma client.
 
 #### Run the NestJS Backend
