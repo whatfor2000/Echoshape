@@ -20,3 +20,13 @@ model User {
   username String?
   password String
 }
+
+model FacebookUser {
+  id         String   @id @default(cuid())
+  email      String?  @unique
+  username   String
+  password   String?
+  provider   String?
+  providerId String?
+  picture    String?
+}

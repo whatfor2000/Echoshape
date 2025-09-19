@@ -27,5 +27,30 @@ export class AuthService {
       }),
     };
   }
+  
+  async loginWithFacebook(fbUser: any) {
+    // fbUser: { provider, providerId, email, firstName, lastName, picture }
+
+    // 1. หา user ใน DB จาก email หรือ providerId
+    let user = await this.usersService.findByProviderId(fbUser.provider, fbUser.providerId);
+
+    // 2. ถ้าไม่เจอ → create user ใหม่
+    if (!user) {
+        user = await this.usersService.createWithFacebook({
+            email: fbUser.email,
+            firstName: fbUser.firstName,
+            lastName: fbUser.lastName,
+            picture: fbUser.picture,
+            provider: fbUser.provider,
+            providerId: fbUser.providerId,
+        });
+    }
+
+    // 3. สร้าง JWT token
+    const payload = { sub: user.id, email: user.email };
+    return {
+        access_token: this.jwtService.sign(payload),
+    };
+}
 }
 

@@ -34,6 +34,11 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
+    const handleFacebookLogin = () => {
+        // redirect ไป backend
+        window.location.href = "http://localhost:3000/auth/facebook";
+    };
+
     const handleLogin = async (e: any) => {
         e.preventDefault();
         setLoading(true);
@@ -191,6 +196,14 @@ const Login = () => {
                         }}
                     >
                         {loading ? <CircularProgress size={24} sx={{ color: 'white' }} /> : 'Login'}
+                    </Button>
+                    <Button onClick={handleFacebookLogin} style={{ background: "#1877F2", color: "white" , padding: '10px', marginTop: '10px', borderRadius: '25px', fontWeight: 'bold', fontFamily: 'Bebas Neue', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)', transition: 'all 0.3s ease', width: '100%' , border: 'none', cursor: 'pointer' }}
+                        sx={{transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'scale(1.05)',
+                                boxShadow: 8,
+                            },}}>
+                        Login with Facebook
                     </Button>
                 </Box>
                 {message && (
