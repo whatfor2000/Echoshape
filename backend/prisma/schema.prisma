@@ -15,18 +15,13 @@ datasource db {
 }
 
 model User {
-  id       String  @id @default(cuid())
-  email    String  @unique
-  username String?
-  password String
-}
-
-model FacebookUser {
   id         String   @id @default(cuid())
   email      String?  @unique
   username   String
   password   String?
-  provider   String?
-  providerId String?
+  provider   String?  // 'facebook', 'google', 'local', etc.
+  providerId String?  // Facebook ID, Google ID, etc.
   picture    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }

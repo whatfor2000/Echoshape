@@ -1,6 +1,6 @@
 
 import { Injectable } from '@nestjs/common';
-import { User, FacebookUser } from '@prisma/client';
+import { User } from '@prisma/client';
 import { PrismaService } from 'src/prisma.service';
 
 // This should be a real class/interface representing a user entity
@@ -22,12 +22,18 @@ export class UsersService {
         id: true,
         username: true,
         email: true,
+        provider: true,
+        providerId: true,
+        picture: true,
+        createdAt: true,
+        updatedAt: true,
+        // password: false, // password is omitted by type, not needed here
       }
     });
   }
   // ✅ หา FacebookUser ด้วย provider + providerId
-  async findByProviderId(provider: string, providerId: string): Promise<FacebookUser | null> {
-    return this.prisma.facebookUser.findFirst({
+  async findByProviderId(provider: string, providerId: string): Promise<User | null> {
+    return this.prisma.user.findFirst({
       where: { provider, providerId },
     });
   }
@@ -41,8 +47,8 @@ export class UsersService {
     provider: string;
     providerId: string;
     password?: string;
-  }): Promise<FacebookUser> {
-    return this.prisma.facebookUser.create({
+  }): Promise<User> {
+    return this.prisma.user.create({
       data: {
         email: data.email,
         username: `${data.firstName ?? ''} ${data.lastName ?? ''}`.trim(),

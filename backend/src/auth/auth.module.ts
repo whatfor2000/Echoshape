@@ -8,6 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { FacebookStrategy } from './strategies/facebook.strategy';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy,FacebookStrategy],
   exports: [AuthService],
 })
 export class AuthModule { }

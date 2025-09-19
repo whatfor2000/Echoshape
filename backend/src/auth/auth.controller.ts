@@ -1,8 +1,9 @@
-import { Controller, Post, UseGuards, Request, Res, Get } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Req, Res, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import express from 'express';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -30,19 +31,20 @@ export class AuthController {
         return { msg: 'Redirecting to Facebook...' };
     }
 
-    // ✅ Facebook Login - callback หลังสำเร็จ
     @Get('facebook/callback')
     @UseGuards(AuthGuard('facebook'))
-    async facebookCallback(@Request() req, @Res({ passthrough: true }) res: express.Response) {
-        const fbUser = req.user; // ได้มาจาก FacebookStrategy.validate()
-        
-        // 👉 เอา fbUser ไปเช็ค/สร้าง user ใน DB จากนั้นออก token
-        const { access_token } = await this.authService.loginWithFacebook(fbUser);
+    async facebookCallback(@Req() req, @Res({ passthrough: true }) res) {
+    console.log('✅ req.user from FacebookStrategy:', req.user);
+    const { access_token } = await this.authService.loginWithFacebook(req.user);
+    console.log('JWT access_token:', access_token);
 
-        // set cookie
-        res.cookie('access_token', access_token, { httpOnly: true });
+    res.cookie('access_token', access_token, { httpOnly: true });
+    return res.redirect(`http://localhost:5173/FacebookLoginSuccess?token=${access_token}`);
+    }
 
-        // redirect กลับ frontend พร้อม token
-        return res.redirect(`http://localhost:5173/login/success?token=${access_token}`);
+    @Get('profile')
+    @UseGuards(JwtAuthGuard)
+    getProfile(@Req() req: any) {
+    return req.user; // req.user จาก JwtStrategy.validate
     }
 }
