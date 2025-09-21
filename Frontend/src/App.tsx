@@ -6,6 +6,7 @@ import About from './pages/About'
 import { Box } from '@mui/material'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import FacebookLoginSuccess from './pages/FacebookLoginSuccess'
 import { AuthProvider, AuthContext } from './AuthContext'
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/function" element={<Function />} />
             <Route path="/about" element={<About />} />
+            <Route path="/FacebookLoginSuccess" element={<FacebookLoginSuccess />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
           </Routes>

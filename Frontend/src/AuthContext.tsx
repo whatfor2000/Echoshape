@@ -1,38 +1,32 @@
-// src/context/AuthContext.tsx
 import React, { createContext, useState, useEffect, ReactNode } from "react";
+import axios from "axios";
 
 interface User {
-  id: string;
+  id?: string;
   email?: string;
-  username?: string;
-  picture?: string;
+  name?: string;
+  // เพิ่ม field อื่น ๆ ตาม JWT payload
 }
 
 interface AuthContextType {
   user: User | null;
-  setUser: (user: User | null) => void;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
-export const AuthContext = createContext<AuthContextType>({
-  user: null,
-  setUser: () => {},
-});
+export const AuthContext = createContext<AuthContextType | null>(null);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // load user from localStorage / backend
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      fetch("http://localhost:3000/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then(res => res.json())
-        .then(data => setUser(data))
-        .catch(() => setUser(null));
-    }
-    console.log("Profile loaded from localStorage", user);
+    axios
+      .get("http://localhost:3000/auth/profile", { withCredentials: true })
+      .then(res => setUser(res.data))
+      .catch(() => setUser(null));
   }, []);
 
   return (
