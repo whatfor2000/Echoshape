@@ -16,7 +16,6 @@ export class AuthController {
     @UseGuards(LocalAuthGuard)
     async login(@Request() req, @Res({ passthrough: true }) res: Response) {
     const { access_token } = await this.authService.login(req.user);
-
     res.cookie('access_token', access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -24,7 +23,7 @@ export class AuthController {
         maxAge: 1000 * 60 * 60 * 24,
     });
 
-    return { success: true, message: 'Login success' };
+    return { success: true, message: 'Login success' , access_token };
     }
 
     @Get('facebook')
@@ -38,7 +37,6 @@ export class AuthController {
     @UseGuards(AuthGuard('facebook'))
     async facebookCallback(@Req() req, @Res({ passthrough: true }) res: Response) {
     const { access_token } = await this.authService.loginWithFacebook(req.user);
-
     res.cookie('access_token', access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

@@ -57,6 +57,7 @@ const Login = () => {
 
             if (response.ok) {
                 if (data.success) {
+                    console.log(data);
                     // sessionStorage.setItem("access_token", data.access_token);
                     setCookie('access_token', data.access_token,);
                     setMessage('Login successful!');
