@@ -23,6 +23,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
+
+    if (window.location.href.indexOf('#_=_') > 0) {
+      window.location.href = window.location.href.replace(/#.*/, '');
+    }
     axios
       .get("http://localhost:3000/auth/profile", { withCredentials: true })
       .then(res => setUser(res.data))

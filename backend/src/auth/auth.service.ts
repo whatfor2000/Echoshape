@@ -33,7 +33,7 @@ export class AuthService {
 
     // 1. หา user ใน DB จาก email หรือ providerId
     let user = await this.usersService.findByProviderId(fbUser.provider, fbUser.providerId);
-
+    console.log(fbUser);
     // 2. ถ้าไม่เจอ → create user ใหม่
     if (!user) {
         user = await this.usersService.createWithFacebook({

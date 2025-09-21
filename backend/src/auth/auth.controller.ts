@@ -44,7 +44,7 @@ export class AuthController {
         maxAge: 1000 * 60 * 60 * 24,
     });
 
-    return res.redirect('http://localhost:5173/FacebookLoginSuccess');
+    return res.redirect('http://localhost:5173/');
     }
 
     @Get('profile')
