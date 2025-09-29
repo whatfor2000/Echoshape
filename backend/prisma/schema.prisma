@@ -23,6 +23,22 @@ model User {
   provider   String?  // 'facebook', 'google', 'local', etc.
   providerId String?  // Facebook ID, Google ID, etc.
   picture    String?
+
+  // Omise subscription fields
+  omiseCustomerId    String?  @db.VarChar(64)
+  omiseCardId        String?  @db.VarChar(64)
+  omiseScheduleId    String?  @db.VarChar(64)
+  subscriptionStatus String?  @default("inactive") // inactive | active | past_due | cancelled
+  planId             String?  @db.VarChar(64)
+  nextBillingAt      DateTime?
+  lastChargeId       String?  @db.VarChar(64)
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model ProcessedEvent {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  createdAt DateTime @default(now())
 }
