@@ -11,4 +11,10 @@ export class SubscriptionsController {
     const user = req.user; // จาก Facebook OAuth
     return this.svc.createSubscription(user.id, dto.planId, dto.amountThb, dto.cardToken);
   }
+  
+  @Post('generate-image')
+  async generateImage(@Req() req: any, @Body() body: { imageUrl: string; amount: number }) {
+    const userId = req.user.id; // จาก OAuth / AuthGuard
+    return this.svc.generateImage(userId, body.imageUrl, body.amount);
+  }
 }

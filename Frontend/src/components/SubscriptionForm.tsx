@@ -1,7 +1,18 @@
-// SubscriptionForm.tsx
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { OMISE_PUBLIC_KEY } from '../../config';
+import React, { useState } from "react";
+import Script from "react-load-script";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  FormControl,
+  Grid,
+  TextField,
+  Typography,
+  ToggleButtonGroup,
+  ToggleButton,
+} from "@mui/material";
 
 declare global {
   interface Window {
@@ -9,189 +20,166 @@ declare global {
   }
 }
 
-// ✅ ประกาศ props interface
 interface SubscriptionFormProps {
-  planId: string;
   amount: number;
+  planId: string;
 }
 
-const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ planId, amount }) => {
-  const [omise, setOmise] = useState<any>(null);
+const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ amount, planId }) => {
+  const [omiseLoaded, setOmiseLoaded] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<"card" | "promptpay">("card");
+  const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!window.Omise) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.omise.co/omise.js';
-      script.onload = () => {
-        setOmise(window.Omise(OMISE_PUBLIC_KEY));
-      };
-      document.body.appendChild(script);
-    } else {
-      setOmise(window.Omise(OMISE_PUBLIC_KEY));
-    }
-  }, []);
+  const handleScriptLoad = () => {
+    console.log("Omise.js loaded!");
+    setOmiseLoaded(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!omise) {
-      alert('Omise.js not loaded yet');
-      return;
+
+    if (paymentMethod === "card") {
+      if (!omiseLoaded || !window.Omise) {
+        alert("Omise not ready yet, please wait...");
+        return;
+      }
+
+      const card = {
+        name: (document.getElementById("name") as HTMLInputElement).value,
+        number: (document.getElementById("number") as HTMLInputElement).value,
+        expiration_month: (document.getElementById("exp_month") as HTMLInputElement).value,
+        expiration_year: (document.getElementById("exp_year") as HTMLInputElement).value,
+        security_code: (document.getElementById("cvc") as HTMLInputElement).value,
+      };
+
+      window.Omise.createToken("card", card, (status: number, response: any) => {
+        if (status === 200) {
+          console.log("Card Token:", response.id);
+          // TODO: ส่ง token ไป backend เพื่อสร้าง subscription
+        } else {
+          alert("Payment failed: " + response.message);
+        }
+      });
+    } else if (paymentMethod === "promptpay") {
+      setLoading(true);
+      try {
+        const res = await fetch("http://localhost:3000/omise/promptpay", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ amount }),
+        });
+        const data = await res.json();
+        setQrUrl(data.promptpayUrl); // ดึง QR code URL จาก backend
+      } catch (error: any) {
+        alert("Error creating PromptPay charge: " + error.message);
+      } finally {
+        setLoading(false);
+      }
     }
-
-    const card = await omise.createToken('card', {
-      name: (document.getElementById('name') as HTMLInputElement).value,
-      number: (document.getElementById('number') as HTMLInputElement).value,
-      expiration_month: (document.getElementById('exp_month') as HTMLInputElement).value,
-      expiration_year: (document.getElementById('exp_year') as HTMLInputElement).value,
-      security_code: (document.getElementById('cvc') as HTMLInputElement).value,
-    });
-
-    if (card.status === 'failed') {
-      alert(card.failure_message);
-      return;
-    }
-
-    await axios.post('/api/subscriptions/subscribe', {
-      planId,
-      amountThb: amount,
-      cardToken: card.id,
-    });
-
-    alert('Subscription successful!');
   };
 
   return (
-    // <form onSubmit={handleSubmit}>
-    //   <input id="name" placeholder="Cardholder Name" required />
-    //   <input id="number" placeholder="Card Number" required />
-    //   <input id="exp_month" placeholder="MM" required />
-    //   <input id="exp_year" placeholder="YY" required />
-    //   <input id="cvc" placeholder="CVC" required />
-    //   <button type="submit">Subscribe {amount} THB</button>
-    // </form>
-    <form
-    onSubmit={handleSubmit}
-    style={{
-        maxWidth: '400px', // กำหนด container width
-        margin: '40px auto',
-        padding: '30px',
-        backgroundColor: 'rgba(245, 245, 245, 0.25)',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        fontFamily: 'Arial, sans-serif',
-    }}
-    >
-    <div style={{ textAlign: 'center', marginBottom: '25px', gap: '10px' }}>
-        <h2
-        style={{
-            fontFamily: '"Bebas Neue", cursive',
-            fontWeight: 'bold',
-            color: '#ffffffff',
-            marginBottom: '15px',
-        }}
-        >
-        Subscribe for {amount} THB
-        </h2>
-        <p style={{ color: '#ffffffff', fontSize: '14px', marginBottom: '20px' }}>
-        Enter your card details below to start your subscription.
-        </p>
-    </div>
+    <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
+      <Script url="https://cdn.omise.co/omise.js" onLoad={handleScriptLoad} />
 
-    <div style={{ marginBottom: '15px' }}>
-        <input
-        id="name"
-        placeholder="Cardholder Name"
-        required
-        style={{
-            width: '100%',
-            padding: '12px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            fontSize: '14px',
-            boxSizing: 'border-box',
-        }}
+      <Card sx={{ maxWidth: 480, width: "100%", p: 2, borderRadius: 3, boxShadow: 6 }}>
+        <CardHeader
+          title="ECHOSHAPE SUBSCRIPTION"
+          subheader={`Subscribe for ${amount} THB`}
+          titleTypographyProps={{ align: "center", fontWeight: "bold" }}
+          subheaderTypographyProps={{ align: "center" }}
         />
-    </div>
+        <CardContent>
+          <Box textAlign="center" mb={3}>
+            <Typography variant="body2" color="text.secondary">
+              เลือกวิธีการชำระเงิน
+            </Typography>
+            <ToggleButtonGroup
+              color="primary"
+              value={paymentMethod}
+              exclusive
+              onChange={(_, val) => val && setPaymentMethod(val)}
+              sx={{ mt: 1 }}
+            >
+              <ToggleButton value="card">บัตรเครดิต / เดบิต</ToggleButton>
+              <ToggleButton value="promptpay">PromptPay</ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
 
-    <div style={{ marginBottom: '15px' }}>
-        <input
-        id="number"
-        placeholder="Card Number"
-        required
-        style={{
-            width: '100%',
-            padding: '12px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            fontSize: '14px',
-            boxSizing: 'border-box',
-        }}
-        />
-    </div>
+          <form onSubmit={handleSubmit}>
+            {paymentMethod === "card" && (
+              <Box>
+                <FormControl fullWidth margin="normal">
+                  <TextField id="name" label="Cardholder Name" required />
+                </FormControl>
+                <FormControl fullWidth margin="normal">
+                  <TextField id="number" label="Card Number" required />
+                </FormControl>
+                <Grid container spacing={2}>
+                  <Grid item xs={4}>
+                    <TextField id="exp_month" label="MM" required />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField id="exp_year" label="YY" required />
+                  </Grid>
+                  <Grid item xs={4}>
+                    <TextField id="cvc" label="CVC" required />
+                  </Grid>
+                </Grid>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  sx={{ mt: 3, py: 1.5, fontWeight: "bold" }}
+                >
+                  Subscribe {amount} THB
+                </Button>
+              </Box>
+            )}
 
-    <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
-        <input
-        id="exp_month"
-        placeholder="MM"
-        required
-        style={{
-            flex: '0 0 30%', // 30% ของความกว้าง container
-            padding: '12px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            fontSize: '14px',
-            boxSizing: 'border-box',
-        }}
-        />
-        <input
-        id="exp_year"
-        placeholder="YY"
-        required
-        style={{
-            flex: '0 0 30%',
-            padding: '12px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            fontSize: '14px',
-            boxSizing: 'border-box',
-        }}
-        />
-    </div>
-    <div style={{ marginBottom: '20px' }}>
-        <input
-        id="cvc"
-        placeholder="CVC"
-        required
-        style={{
-            padding: '12px',
-            borderRadius: '6px',
-            border: '1px solid #ccc',
-            fontSize: '14px',
-            boxSizing: 'border-box',
-        }}
-        />
-    </div>
-
-    <button
-        type="submit"
-        style={{
-        width: '100%',
-        padding: '14px',
-        backgroundColor: '#003E87',
-        color: '#fff',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        fontSize: '16px',
-        fontWeight: 'bold',
-        transition: 'background-color 0.2s',
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#002C64')}
-        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#003E87')}
-    >
-        Subscribe {amount} THB
-    </button>
-    </form>
+            {paymentMethod === "promptpay" && (
+              <Box textAlign="center" my={3}>
+                <Typography variant="body1" gutterBottom>
+                  สแกน QR เพื่อชำระ {amount} THB
+                </Typography>
+                <Box
+                  sx={{
+                    width: 200,
+                    height: 200,
+                    borderRadius: 2,
+                    mx: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    bgcolor: qrUrl ? "transparent" : "#eee",
+                  }}
+                >
+                  {qrUrl ? (
+                    <img src={qrUrl} alt="PromptPay QR" style={{ width: 200, height: 200 }} />
+                  ) : loading ? (
+                    <Typography variant="caption">กำลังสร้าง QR...</Typography>
+                  ) : (
+                    <Typography variant="caption" color="text.secondary">
+                      QR CODE
+                    </Typography>
+                  )}
+                </Box>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  sx={{ mt: 3, py: 1.5, fontWeight: "bold" }}
+                >
+                  Generate QR
+                </Button>
+              </Box>
+              
+            )}
+          </form>
+        </CardContent>
+      </Card>
+    </Box>
   );
 };
 

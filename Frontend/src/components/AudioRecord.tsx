@@ -3,9 +3,10 @@ import { Box, Button, Paper, Typography } from '@mui/material'
 
 interface AudioRecorderProps {
   onResult: (data: unknown) => void; // เพิ่ม prop นี้เพื่อส่งค่าผลลัพธ์กลับ
+  disabled?: boolean
 }
 
-const AudioRecorder: React.FC<AudioRecorderProps> = ({ onResult }) => {
+const AudioRecorder: React.FC<AudioRecorderProps> = ({ onResult, disabled }) => {
   const [isRecording, setIsRecording] = useState(false)
   const [audioURL, setAudioURL] = useState<string | null>(null)
   const [liveScript, setLiveScript] = useState<string>('')  // จัดเก็บ liveScript
@@ -208,7 +209,7 @@ const handleUpload = async () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 3 }}>
           <Button
             variant="contained"
-            disabled={isRecording}
+            disabled={isRecording || disabled}
             onClick={startRecording}
             sx={{
               backdropFilter: 'blur(30px)',

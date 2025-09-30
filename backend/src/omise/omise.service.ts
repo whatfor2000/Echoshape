@@ -1,6 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger,HttpException,HttpStatus  } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
 import { URLSearchParams } from 'url';
+import { PrismaService } from '../prisma.service';
 
 type NullableString = string | null | undefined;
 
@@ -30,12 +31,14 @@ interface OmiseEventResp {
   [k: string]: any;
 }
 
+
+
 @Injectable()
 export class OmiseService {
   private readonly logger = new Logger(OmiseService.name);
   private readonly omiseBase = process.env.OMISE_BASE_URL ?? 'https://api.omise.co';
   private readonly secretKey = process.env.OMISE_SECRET_KEY ?? '';
-
+  constructor(private readonly prisma: PrismaService) {}
   /**
    * Create customer + attach card in one call (card token from omise.js).
    * Returns typed result and extracted cardId (if present).
@@ -129,5 +132,56 @@ export class OmiseService {
     const url = `${this.omiseBase}/schedules/${encodeURIComponent(scheduleId)}`;
     const resp = await axios.delete(url, { auth: { username: this.secretKey, password: '' } });
     return resp.status === 204 || resp.status === 200;
+  }
+
+    async createPromptPayCharge(amount: number) {
+    try {
+      const response = await axios.post(
+        'https://api.omise.co/charges',
+        {
+          amount: amount * 100, // Omise ใช้สตางค์
+          currency: 'thb',
+          source: {
+            type: 'promptpay',
+          },
+          capture: true,
+        },
+        {
+          auth: {
+            username: this.secretKey,
+            password: '',
+          },
+        },
+      );
+      const promptpayUrl = response.data?.source?.scannable_code?.image?.download_uri;
+
+      if (!promptpayUrl) {
+        throw new HttpException('Cannot get PromptPay QR URL', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+
+      // บันทึกใน DB
+      const charge = await this.prisma.charge.create({
+        data: {
+          amount,
+          currency: 'THB',
+          promptpayUrl: promptpayUrl,
+          status: response.data.status,
+        },
+      });
+
+      return {
+        id: charge.id,
+        amount: charge.amount,
+        currency: charge.currency,
+        promptpayUrl: charge.promptpayUrl,
+        status: charge.status,
+      };
+    } catch (error: any) {
+      console.error("Omise error:", error.response?.data || error.message);
+      throw new HttpException(
+        error.response?.data || error.message,
+        HttpStatus.BAD_REQUEST
+      );
+    }
   }
 }

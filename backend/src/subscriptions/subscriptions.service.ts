@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { OmiseService } from './omise.service';
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { OmiseService } from '../omise/omise.service';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -8,6 +8,45 @@ export class SubscriptionsService {
 
   private thbToSatang(amountThb: number) {
     return Math.round(amountThb * 100);
+  }
+
+    // เรียกเมื่อ user generate ภาพ
+  async generateImage(userId: string, imageUrl: string, amount: number) {
+    // ดึงข้อมูล user
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('User not found');
+
+    // กำหนด limit
+    const maxImages = user.subscriptionStatus === 'active' ? 50 : 2;
+
+    // เช็ค limit
+    if (user.usedThisMonth >= maxImages) {
+      throw new BadRequestException(`คุณใช้จำนวนภาพครบ limit แล้ว (${maxImages} ภาพต่อเดือน)`);
+    }
+
+    // สร้าง Charge ใน DB
+    await this.prisma.charge.create({
+      data: {
+        amount,
+        currency: 'THB',
+        promptpayUrl: imageUrl,
+        status: 'generated',
+      },
+    });
+
+    // อัปเดต user usedThisMonth
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        usedThisMonth: user.usedThisMonth + 1,
+      },
+    });
+
+    return {
+      message: 'Image generated successfully',
+      usedThisMonth: user.usedThisMonth + 1,
+      maxImages,
+    };
   }
 
   async createSubscription(userId: string, planId: string, amountThb: number, cardToken: string) {

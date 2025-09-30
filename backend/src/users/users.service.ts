@@ -31,6 +31,7 @@ export class UsersService {
         omiseCardId: true,
         omiseScheduleId: true,
         subscriptionStatus: true,
+        usedThisMonth: true,
         planId: true,
         nextBillingAt: true,   // ✅ เพิ่ม field ที่ขาด
         lastChargeId: true,    // ✅ เพิ่ม field ที่ขาด

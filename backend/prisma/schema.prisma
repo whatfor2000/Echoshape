@@ -33,6 +33,8 @@ model User {
   nextBillingAt      DateTime?
   lastChargeId       String?  @db.VarChar(64)
 
+  usedThisMonth      Int      @default(0) //จำนวนภาพที่ใช้
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
@@ -41,4 +43,13 @@ model ProcessedEvent {
   id        String   @id @default(cuid())
   eventId   String   @unique
   createdAt DateTime @default(now())
+}
+
+model Charge {
+  id           String   @id @default(cuid())
+  amount       Int
+  currency     String
+  promptpayUrl String
+  status       String
+  createdAt    DateTime @default(now())
 }

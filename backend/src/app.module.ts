@@ -5,11 +5,12 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { RegisterModule } from './register/register.module';
+import { OmiseModule } from './omise/omise.module';
 
 @Module({
   imports: [
     AuthModule, 
-    UsersModule, 
+    UsersModule,OmiseModule,
     ConfigModule.forRoot({
     isGlobal: true,
     envFilePath: '.env',
