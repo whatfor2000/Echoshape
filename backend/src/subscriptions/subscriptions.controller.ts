@@ -16,7 +16,6 @@ export class SubscriptionsController {
   @Get('me')
   async getMySubscription(@Req() req: any) {
     const userId = req.user?.Id;
-    console.log('User ID from JWT:', userId);
     if (!userId) throw new UnauthorizedException();
     return this.svc.getUserSubscription(userId);
   }

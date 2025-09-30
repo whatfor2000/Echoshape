@@ -9,6 +9,7 @@ import Register from './pages/Register'
 import { AuthProvider, AuthContext } from './AuthContext'
 import FacebookRedirect from './pages/FacebookRedirect'
 import SubscriptionPage from './pages/SubscriptionPage'
+import Profile from './pages/Profile'
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/subscription" element={<SubscriptionPage />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </Box>
       </Box>

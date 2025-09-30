@@ -24,6 +24,7 @@ export class SubscriptionsService {
         planId: true,
         nextBillingAt: true,
         usedThisMonth: true, // ต้องมี field ใน Prisma schema
+        maxGenerate: true,  // ต้องมี field ใน Prisma schema
       },
     });
 

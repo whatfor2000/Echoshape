@@ -52,6 +52,9 @@ const Header: React.FC = () => {
           <NavLink to="/subscription" style={({ isActive }) => ({ ...linkStyle, ...(isActive ? activeStyle : {}) })}>
             <Typography sx={TextStyle}>Subscription</Typography>
           </NavLink>
+          <NavLink to={isLogin ? "/profile" : "/login"} style={({ isActive }) => ({ ...linkStyle, ...(isActive ? activeStyle : {}) })}>
+            <Typography sx={TextStyle}>Profile</Typography>
+          </NavLink>
         </Box>
 
         {/* Login / Logout */}

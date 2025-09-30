@@ -29,10 +29,9 @@ const Function: React.FC = () => {
     async function fetchSubscription() {
       try {
         const res = await fetch('http://localhost:3000/subscriptions/me', {
-          // headers: {
-          //   'Authorization': `Bearer ${Cookies.get('access_token')}`,
-          // },
-          
+          headers: {
+            'Authorization': `Bearer ${Cookies.get('access_token')}`,
+          },
           credentials: 'include',
       })
         if (!res.ok) throw new Error('Failed to fetch subscription')
@@ -115,6 +114,15 @@ const Function: React.FC = () => {
               {tabIndex === 1 && <AudioUpload onResult={handleGenerate} disabled={loading} />}
             </Box>
           </Paper>
+          <Typography sx={{ mt: 2, color: '#fff', fontFamily: 'Bebas Neue', fontSize: '1rem' }}>
+            คุณมีสิทธิ์สร้างภาพได้สูงสุด {subscription.maxGenerate} ภาพต่อเดือน
+          </Typography>
+          <Typography sx={{ color: '#fff', fontFamily: 'Bebas Neue', fontSize: '1rem' }}>
+            ภาพที่ใช้ไปแล้ว: {subscription.usedThisMonth} ภาพ
+          </Typography>
+          {loading && <Typography sx={{ color: '#fff', fontFamily: 'Bebas Neue', fontSize: '1rem' }}>
+            กำลังประมวลผล... กรุณารอสักครู่
+          </Typography>}
         </Box>
 
         {/* RIGHT SIDE - Result */}
