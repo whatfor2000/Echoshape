@@ -26,7 +26,12 @@ const Function: React.FC = () => {
   useEffect(() => {
     async function fetchSubscription() {
       try {
-        const res = await fetch('/api/subscriptions/me')
+        const res = await fetch('http://localhost:3000/subscriptions/me', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          }
+          ,credentials: 'include',
+      })
         if (!res.ok) throw new Error('Failed to fetch subscription')
         const data = await res.json()
         setSubscription(data)
@@ -51,9 +56,12 @@ const Function: React.FC = () => {
     setLoading(true)
     try {
       // เรียก backend เพื่อบันทึก charge และ update usedThisMonth
-      const res = await fetch('/api/subscriptions/generate-image', {
+      const res = await fetch('http://localhost:3000/subscriptions/generate-image', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' ,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        credentials: 'include',
         body: JSON.stringify({ imageUrl: data.image, amount: 0 }),
       })
       const resData = await res.json()

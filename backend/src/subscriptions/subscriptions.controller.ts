@@ -1,6 +1,6 @@
-// subscriptions.controller.ts
-import { Body, Controller, Post, Req } from '@nestjs/common';
+import { Body, Controller, Post, Req,Get,UseGuards,UnauthorizedException  } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('subscriptions')
 export class SubscriptionsController {
@@ -10,6 +10,14 @@ export class SubscriptionsController {
   async subscribe(@Req() req: any, @Body() dto: { planId: string; amountThb: number; cardToken: string }) {
     const user = req.user; // จาก Facebook OAuth
     return this.svc.createSubscription(user.id, dto.planId, dto.amountThb, dto.cardToken);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  async getMySubscription(@Req() req: any) {
+    const userId = req.user?.id;
+    if (!userId) throw new UnauthorizedException();
+    return this.svc.getUserSubscription(userId);
   }
   
   @Post('generate-image')

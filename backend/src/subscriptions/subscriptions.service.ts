@@ -5,9 +5,30 @@ import { PrismaService } from '../prisma.service';
 @Injectable()
 export class SubscriptionsService {
   constructor(private readonly omise: OmiseService, private readonly prisma: PrismaService) {}
-
+  
   private thbToSatang(amountThb: number) {
     return Math.round(amountThb * 100);
+  }
+
+  async getUserSubscription(userId: string) {
+    if (!userId) {
+      throw new Error('userId is required'); // หรือ BadRequestException
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        subscriptionStatus: true,
+        planId: true,
+        nextBillingAt: true,
+        usedThisMonth: true, // ต้องมี field ใน Prisma schema
+      },
+    });
+
+    if (!user) throw new Error('User not found');
+    return user;
   }
 
     // เรียกเมื่อ user generate ภาพ
