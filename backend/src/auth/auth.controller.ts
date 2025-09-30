@@ -15,7 +15,7 @@ export class AuthController {
     @Post('login')
     @UseGuards(LocalAuthGuard)
     async login(@Request() req, @Res({ passthrough: true }) res: Response) {
-    const { access_token } = await this.authService.login(req.user);
+    const { access_token } = await this.authService.login(req.id);
     res.cookie('access_token', access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -36,7 +36,7 @@ export class AuthController {
     @Get('facebook/callback')
     @UseGuards(AuthGuard('facebook'))
     async facebookCallback(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const { access_token } = await this.authService.loginWithFacebook(req.user);
+    const { access_token } = await this.authService.loginWithFacebook(req.id);
     res.cookie('access_token', access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -50,7 +50,7 @@ export class AuthController {
     @Get('profile')
     @UseGuards(JwtAuthGuard)
     getProfile(@Req() req) {
-    return req.user; // ข้อมูล user จาก JWT
+    return req.id; // ข้อมูล user จาก JWT
     }
 
     @Post('logout')

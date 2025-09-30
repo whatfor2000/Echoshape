@@ -4,6 +4,7 @@ import AudioRecorder from '../components/AudioRecord'
 import AudioUpload from '../components/AudioUpload'
 import ImageComponent from '../components/Images'
 import EmotionBar from '../components/Emotion'
+import Cookies from 'js-cookie'
 
 // interface สำหรับ subscription จาก backend
 interface UserSubscription {
@@ -22,15 +23,17 @@ const Function: React.FC = () => {
   })
   const [loading, setLoading] = useState(false)
 
+
   // fetch subscription info จาก backend
   useEffect(() => {
     async function fetchSubscription() {
       try {
         const res = await fetch('http://localhost:3000/subscriptions/me', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          }
-          ,credentials: 'include',
+          // headers: {
+          //   'Authorization': `Bearer ${Cookies.get('access_token')}`,
+          // },
+          
+          credentials: 'include',
       })
         if (!res.ok) throw new Error('Failed to fetch subscription')
         const data = await res.json()

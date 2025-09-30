@@ -16,6 +16,7 @@
     "@mui/material": "^7.0.2",
     "axios": "^1.12.2",
     "env": "^0.0.2",
+    "js-cookie": "^3.0.5",
     "omise": "^1.0.0",
     "react": "^19.0.0",
     "react-cookie": "^8.0.1",
