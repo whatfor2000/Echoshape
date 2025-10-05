@@ -55,6 +55,7 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ amount, planId }) =
       };
 
       window.Omise.createToken("card", card, (status: number, response: any) => {
+        console.log("Omise createToken response:", status, response);
         if (status === 200) {
           console.log("Card Token:", response.id);
           // TODO: ส่ง token ไป backend เพื่อสร้าง subscription
