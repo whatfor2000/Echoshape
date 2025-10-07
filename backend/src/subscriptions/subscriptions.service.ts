@@ -79,18 +79,47 @@ export class SubscriptionsService {
       let customerId = user.omiseCustomerId ?? undefined;
       let cardId: string | undefined;
 
+      // สร้าง customer ใหม่พร้อมบัตร ถ้าไม่มี
       if (!customerId) {
-        const { customer, cardId: createdCardId } = await this.omise.createCustomerWithCard(user.email, user.id, cardToken);
+        const { customer, cardId: createdCardId } = await this.omise.createCustomerWithCard(
+          user.email,
+          user.id,
+          cardToken
+        );
         customerId = customer.id;
         cardId = createdCardId;
       } else {
+        // สร้าง card ใหม่สำหรับ customer เดิม
         const cardResp = await this.omise.createCardForCustomer(customerId, cardToken);
         cardId = cardResp.id;
       }
 
       if (!cardId) throw new Error('card id missing after create');
 
-      const schedule = await this.omise.createSchedule(customerId, cardId, this.thbToSatang(amountThb), planId);
+      // เตรียมข้อมูล schedule ตาม spec ของ Omise
+      const today = new Date();
+      const nextYear = new Date();
+      nextYear.setFullYear(today.getFullYear() + 1);
+
+      const payload = {
+        description: `Echoshape ${planId} subscription for customer ${customerId}`,
+        start_date: today.toISOString().split('T')[0],
+        end_date: nextYear.toISOString().split('T')[0],
+        every: 1,
+        period: 'month',
+        on: {
+          days_of_month: [today.getDate()]
+        },
+        charge: {
+          description: `Monthly charge ${planId}`,
+          amount: this.thbToSatang(amountThb), // number, ไม่ใช่ string
+          currency: 'thb',
+          customer: customerId,
+          card: cardId
+        }
+      };
+
+      const schedule = await this.omise.createScheduleFromPayload(payload);
 
       const updated = await tx.user.update({
         where: { id: userId },
@@ -99,7 +128,10 @@ export class SubscriptionsService {
           omiseCardId: cardId,
           omiseScheduleId: schedule.id,
           subscriptionStatus: 'active',
-          planId
+          planId,
+          maxGenerate: planId === 'subscription' ? 50 : 2,
+          nextBillingAt: new Date(schedule.charge.schedule_at),
+          usedThisMonth: 0, // รีเซ็ตการใช้งานรายเดือน
         }
       });
 

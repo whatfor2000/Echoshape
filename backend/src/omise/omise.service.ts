@@ -1,4 +1,4 @@
-import { Injectable, Logger,HttpException,HttpStatus  } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import axios, { AxiosResponse } from 'axios';
 import { URLSearchParams } from 'url';
 import { PrismaService } from '../prisma.service';
@@ -9,7 +9,6 @@ interface OmiseCustomerResp {
   id: string;
   email?: NullableString;
   description?: NullableString;
-  // Omise's default_card may be string id OR a card object; allow both
   default_card?: string | { id?: string } | null;
   [k: string]: any;
 }
@@ -26,145 +25,195 @@ interface OmiseScheduleResp {
 
 interface OmiseEventResp {
   id: string;
-  key: string; // e.g., "charge.complete"
+  key: string;
   data: { object: any };
   [k: string]: any;
 }
-
-
 
 @Injectable()
 export class OmiseService {
   private readonly logger = new Logger(OmiseService.name);
   private readonly omiseBase = process.env.OMISE_BASE_URL ?? 'https://api.omise.co';
   private readonly secretKey = process.env.OMISE_SECRET_KEY ?? '';
+
   constructor(private readonly prisma: PrismaService) {}
+
   /**
-   * Create customer + attach card in one call (card token from omise.js).
-   * Returns typed result and extracted cardId (if present).
+   * Create customer + attach card in one call
    */
-  async createCustomerWithCard(userEmail: NullableString, userId: string, cardToken: string)
-    : Promise<{ customer: OmiseCustomerResp; cardId?: string }> {
+  async createCustomerWithCard(
+    userEmail: NullableString,
+    userId: string,
+    cardToken: string
+  ): Promise<{ customer: OmiseCustomerResp; cardId?: string }> {
+    try {
+      const params = new URLSearchParams({
+        email: userEmail ?? '',
+        description: `Echoshape user ${userId}`,
+        card: cardToken,
+      }).toString();
 
-    const params = new URLSearchParams({
-      email: userEmail ?? '', // <-- null-safe
-      description: `Echoshape user ${userId}`,
-      card: cardToken,
-    }).toString();
+      const url = `${this.omiseBase}/customers`;
+      const resp: AxiosResponse<OmiseCustomerResp> = await axios.post(url, params, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        auth: { username: this.secretKey, password: '' },
+      });
 
-    const url = `${this.omiseBase}/customers`;
+      const customer = resp.data;
+      let cardId: string | undefined;
+      if (typeof customer.default_card === 'string') cardId = customer.default_card;
+      else if (customer.default_card && typeof customer.default_card === 'object')
+        cardId = (customer.default_card as any).id;
 
-    // Type the response explicitly
-    const resp: AxiosResponse<OmiseCustomerResp> = await axios.post(url, params, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      auth: { username: this.secretKey, password: '' }, // basic auth
-    });
-
-    const customer = resp.data;
-    // default_card can be string or object — make extraction robust
-    let cardId: string | undefined;
-    if (typeof customer.default_card === 'string') cardId = customer.default_card;
-    else if (customer.default_card && typeof customer.default_card === 'object') cardId = (customer.default_card as any).id;
-
-    return { customer, cardId };
+      return { customer, cardId };
+    } catch (error: any) {
+      this.logger.error('Failed to create customer with card', error.response?.data || error.message);
+      throw new HttpException(
+        error.response?.data || error.message,
+        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
-   * Attach card token to an existing customer -> returns card id
+   * Attach card to existing customer
    */
   async createCardForCustomer(customerId: string, cardToken: string): Promise<OmiseCardResp> {
-    const params = new URLSearchParams({ card: cardToken }).toString();
-    const url = `${this.omiseBase}/customers/${encodeURIComponent(customerId)}/cards`;
+    try {
+      const params = new URLSearchParams({ card: cardToken }).toString();
+      const url = `${this.omiseBase}/customers/${encodeURIComponent(customerId)}/cards`;
 
-    const resp: AxiosResponse<OmiseCardResp> = await axios.post(url, params, {
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      auth: { username: this.secretKey, password: '' },
-    });
+      const resp: AxiosResponse<OmiseCardResp> = await axios.post(url, params, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        auth: { username: this.secretKey, password: '' },
+      });
 
-    return resp.data;
+      return resp.data;
+    } catch (error: any) {
+      this.logger.error('Failed to create card for customer', error.response?.data || error.message);
+      throw new HttpException(
+        error.response?.data || error.message,
+        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
-   * Create charge schedule (monthly example).
-   * amountSatang must be integer (e.g., 299.00 THB => 29900)
+   * Create schedule with full payload
    */
-  async createSchedule(customerId: string, cardId: string, amountSatang: number, planId: string)
-    : Promise<OmiseScheduleResp> {
-
-    const payload = {
-      description: `Echoshape ${planId} subscription for customer ${customerId}`,
-      start_date: new Date().toISOString().split('T')[0], // YYYY-MM-DD
-      every: '1',
-      period: 'month',
-      charge: {
-        description: `Monthly charge ${planId}`,
-        amount: amountSatang.toString(),
-        currency: 'thb',
-        customer: customerId,
-        card: cardId,
-      }
-    };
-
-    const url = `${this.omiseBase}/schedules`;
-    const resp: AxiosResponse<OmiseScheduleResp> = await axios.post(url, payload, {
-      headers: { 'Content-Type': 'application/json' },
-      auth: { username: this.secretKey, password: '' },
-    });
-
-    return resp.data;
+  async createScheduleFromPayload(payload: Record<string, any>): Promise<OmiseScheduleResp> {
+    try {
+      const url = `${this.omiseBase}/schedules`;
+      const resp: AxiosResponse<OmiseScheduleResp> = await axios.post(url, payload, {
+        headers: { 'Content-Type': 'application/json' },
+        auth: { username: this.secretKey, password: '' },
+      });
+      return resp.data;
+    } catch (error: any) {
+      this.logger.error('Failed to create schedule', error.response?.data || error.message);
+      throw new HttpException(
+        error.response?.data || error.message,
+        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
-   * Verify event by fetching it from Omise Events API (recommended for webhook verification).
+   * Create monthly schedule for subscription
+   */
+  async createSchedule(
+    customerId: string,
+    cardId: string,
+    amountSatang: number,
+    planId: string
+  ): Promise<OmiseScheduleResp> {
+    const today = new Date();
+    const nextYear = new Date();
+    nextYear.setFullYear(today.getFullYear() + 1);
+
+  const payload = {
+    description: `Echoshape ${planId} subscription for customer ${customerId}`,
+    start_date: today.toISOString().split('T')[0],
+    end_date: nextYear.toISOString().split('T')[0],
+    every: 1,
+    period: 'month',
+    on: { days_of_month: [today.getDate()] },
+    charge: {
+      description: `Monthly charge ${planId}`,
+      amount: amountSatang, // <-- number ไม่ใช่ string
+      currency: 'thb',
+      customer: customerId,
+      card: cardId,
+    },
+  };
+
+  console.log('Creating schedule with payload:', payload);
+
+    return this.createScheduleFromPayload(payload);
+  }
+
+  /**
+   * Fetch Omise event
    */
   async getEvent(eventId: string): Promise<OmiseEventResp> {
-    const url = `${this.omiseBase}/events/${encodeURIComponent(eventId)}`;
-    const resp: AxiosResponse<OmiseEventResp> = await axios.get(url, {
-      auth: { username: this.secretKey, password: '' },
-    });
-    return resp.data;
+    try {
+      const url = `${this.omiseBase}/events/${encodeURIComponent(eventId)}`;
+      const resp: AxiosResponse<OmiseEventResp> = await axios.get(url, {
+        auth: { username: this.secretKey, password: '' },
+      });
+      return resp.data;
+    } catch (error: any) {
+      this.logger.error('Failed to fetch event', error.response?.data || error.message);
+      throw new HttpException(
+        error.response?.data || error.message,
+        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * Delete schedule
    */
-  async deleteSchedule(scheduleId: string) {
-    const url = `${this.omiseBase}/schedules/${encodeURIComponent(scheduleId)}`;
-    const resp = await axios.delete(url, { auth: { username: this.secretKey, password: '' } });
-    return resp.status === 204 || resp.status === 200;
+  async deleteSchedule(scheduleId: string): Promise<boolean> {
+    try {
+      const url = `${this.omiseBase}/schedules/${encodeURIComponent(scheduleId)}`;
+      const resp = await axios.delete(url, { auth: { username: this.secretKey, password: '' } });
+      return resp.status === 204 || resp.status === 200;
+    } catch (error: any) {
+      this.logger.error('Failed to delete schedule', error.response?.data || error.message);
+      throw new HttpException(
+        error.response?.data || error.message,
+        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
-    async createPromptPayCharge(amount: number) {
+  /**
+   * Create PromptPay charge
+   */
+  async createPromptPayCharge(amount: number) {
     try {
       const response = await axios.post(
         'https://api.omise.co/charges',
         {
-          amount: amount * 100, // Omise ใช้สตางค์
+          amount: amount * 100,
           currency: 'thb',
-          source: {
-            type: 'promptpay',
-          },
+          source: { type: 'promptpay' },
           capture: true,
         },
         {
-          auth: {
-            username: this.secretKey,
-            password: '',
-          },
-        },
+          auth: { username: this.secretKey, password: '' },
+        }
       );
+
       const promptpayUrl = response.data?.source?.scannable_code?.image?.download_uri;
+      if (!promptpayUrl) throw new HttpException('Cannot get PromptPay QR URL', HttpStatus.INTERNAL_SERVER_ERROR);
 
-      if (!promptpayUrl) {
-        throw new HttpException('Cannot get PromptPay QR URL', HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-
-      // บันทึกใน DB
       const charge = await this.prisma.charge.create({
         data: {
           amount,
           currency: 'THB',
-          promptpayUrl: promptpayUrl,
+          promptpayUrl,
           status: response.data.status,
         },
       });
@@ -177,11 +226,15 @@ export class OmiseService {
         status: charge.status,
       };
     } catch (error: any) {
-      console.error("Omise error:", error.response?.data || error.message);
-      throw new HttpException(
-        error.response?.data || error.message,
-        HttpStatus.BAD_REQUEST
-      );
+      this.logger.error('Failed to create PromptPay charge', error.response?.data || error.message);
+      throw new HttpException(error.response?.data || error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  /**
+   * Helper: convert THB to Satang
+   */
+  thbToSatang(amount: number): number {
+    return Math.round(amount * 100);
   }
 }

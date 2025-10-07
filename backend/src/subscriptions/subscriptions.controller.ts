@@ -6,11 +6,23 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 export class SubscriptionsController {
   constructor(private readonly svc: SubscriptionsService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('subscribe')
-  async subscribe(@Req() req: any, @Body() dto: { planId: string; amountThb: number; cardToken: string }) {
-    const user = req.user?.Id; // จาก Facebook OAuth
-    return this.svc.createSubscription(user.id, dto.planId, dto.amountThb, dto.cardToken);
+  async subscribe(
+    @Req() req: any, 
+    @Body() dto: { planId: string; amount: number; token: string } // <--- ต้องตรงกับ frontend
+  ) {
+    const userId = req.user?.Id; // ตรวจสอบว่า jwt guard ใส่ userId ลง req.user
+    if (!userId) throw new UnauthorizedException('User not authenticated');
+
+    // map dto fields ให้ตรง service
+    const amountThb = dto.amount;
+    const cardToken = dto.token;
+
+    return this.svc.createSubscription(userId, dto.planId, amountThb, cardToken);
   }
+
+
 
   @UseGuards(JwtAuthGuard)
   @Get('me')

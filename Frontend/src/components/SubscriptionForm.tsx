@@ -14,6 +14,8 @@ import {
   ToggleButton,
 } from "@mui/material";
 
+import Cookies from "js-cookie";
+
 declare global {
   interface Window {
     Omise: any;
@@ -77,9 +79,12 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ amount, planId }) =
 
           // ส่ง token ไป backend เพื่อสร้าง subscription
           try {
-            const res = await fetch("http://localhost:3000/omise/subscribe", {
+            const res = await fetch("http://localhost:3000/subscriptions/subscribe", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: { 
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${Cookies.get('access_token')}`
+               },
               body: JSON.stringify({ token, amount, planId }),
             });
 
