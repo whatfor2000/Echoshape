@@ -14,7 +14,6 @@ import {
   ToggleButton,
 } from "@mui/material";
 
-
 declare global {
   interface Window {
     Omise: any;
@@ -27,43 +26,76 @@ interface SubscriptionFormProps {
 }
 
 const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ amount, planId }) => {
-  const [omiseLoaded, setOmiseLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"card" | "promptpay">("card");
   const [qrUrl, setQrUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [omiseLoaded, setOmiseLoaded] = useState(false);
 
+  // ✅ โหลด Omise.js และตั้งค่า Public Key จาก .env
   const handleScriptLoad = () => {
-    console.log("Omise.js loaded!");
+    const Omise = window.Omise;
+    if (!Omise) {
+      console.error("Omise.js not found");
+      return;
+    }
+
+    const publicKey = import.meta.env.VITE_OMISE_PUBLIC_KEY;
+    if (!publicKey) {
+      console.error("❌ Missing REACT_APP_OMISE_PUBLIC_KEY in .env");
+      return;
+    }
+
+    Omise.setPublicKey(publicKey);
     setOmiseLoaded(true);
+    console.log("✅ Omise.js loaded successfully with key:", publicKey);
   };
 
+  // ✅ เมื่อกด Submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (paymentMethod === "card") {
       if (!omiseLoaded || !window.Omise) {
-        alert("Omise not ready yet, please wait...");
+        alert("Omise not ready yet. Please wait a moment...");
         return;
       }
 
       const card = {
-        name: (document.getElementById("name") as HTMLInputElement).value,
-        number: (document.getElementById("number") as HTMLInputElement).value,
-        expiration_month: (document.getElementById("exp_month") as HTMLInputElement).value,
-        expiration_year: (document.getElementById("exp_year") as HTMLInputElement).value,
-        security_code: (document.getElementById("cvc") as HTMLInputElement).value,
+        name: (document.getElementById("name") as HTMLInputElement)?.value,
+        number: (document.getElementById("number") as HTMLInputElement)?.value,
+        expiration_month: (document.getElementById("exp_month") as HTMLInputElement)?.value,
+        expiration_year: (document.getElementById("exp_year") as HTMLInputElement)?.value,
+        security_code: (document.getElementById("cvc") as HTMLInputElement)?.value,
       };
 
-      window.Omise.createToken("card", card, (status: number, response: any) => {
+      window.Omise.createToken("card", card, async (status: number, response: any) => {
         console.log("Omise createToken response:", status, response);
+
         if (status === 200) {
-          console.log("Card Token:", response.id);
-          // TODO: ส่ง token ไป backend เพื่อสร้าง subscription
+          const token = response.id;
+          console.log("✅ Card Token Created:", token);
+
+          // ส่ง token ไป backend เพื่อสร้าง subscription
+          try {
+            const res = await fetch("http://localhost:3000/omise/subscribe", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ token, amount, planId }),
+            });
+
+            const data = await res.json();
+            alert("🎉 Subscription created successfully!");
+            console.log("Subscription result:", data);
+          } catch (error: any) {
+            alert("❌ Error creating subscription: " + error.message);
+          }
         } else {
-          alert("Payment failed: " + response.message);
+          alert("❌ Payment failed: " + response.message);
         }
       });
-    } else if (paymentMethod === "promptpay") {
+    }
+
+    if (paymentMethod === "promptpay") {
       setLoading(true);
       try {
         const res = await fetch("http://localhost:3000/omise/promptpay", {
@@ -72,9 +104,9 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ amount, planId }) =
           body: JSON.stringify({ amount }),
         });
         const data = await res.json();
-        setQrUrl(data.promptpayUrl); // ดึง QR code URL จาก backend
+        setQrUrl(data.promptpayUrl);
       } catch (error: any) {
-        alert("Error creating PromptPay charge: " + error.message);
+        alert("❌ Error creating PromptPay charge: " + error.message);
       } finally {
         setLoading(false);
       }
@@ -118,14 +150,14 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ amount, planId }) =
                 <FormControl fullWidth margin="normal">
                   <TextField id="number" label="Card Number" required />
                 </FormControl>
-                <Grid container spacing={2}>
-                  <Grid item xs={4}>
+                <Grid container component="div" spacing={2}>
+                  <Grid item component="div" xs={4}>
                     <TextField id="exp_month" label="MM" required />
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item component="div" xs={4}>
                     <TextField id="exp_year" label="YY" required />
                   </Grid>
-                  <Grid item xs={4}>
+                  <Grid item component="div" xs={4}>
                     <TextField id="cvc" label="CVC" required />
                   </Grid>
                 </Grid>
@@ -176,7 +208,6 @@ const SubscriptionForm: React.FC<SubscriptionFormProps> = ({ amount, planId }) =
                   Generate QR
                 </Button>
               </Box>
-              
             )}
           </form>
         </CardContent>
