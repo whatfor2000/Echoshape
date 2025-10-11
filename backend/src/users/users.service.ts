@@ -67,4 +67,22 @@ export class UsersService {
       },
     });
   }
+
+  async getProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        picture: true,
+        subscriptionStatus: true,
+        planId: true,
+        nextBillingAt: true,
+        usedThisMonth: true,
+        maxGenerate: true,
+      },
+    });
+    return user;
+  }
 }

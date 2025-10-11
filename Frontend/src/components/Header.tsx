@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Box, Button } from "@mui/material";
 import { AuthContext } from "../AuthContext";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const Header: React.FC = () => {
   const auth = useContext(AuthContext);
@@ -16,8 +17,11 @@ const Header: React.FC = () => {
   const handleLogout = async () => {
     try {
       await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {}, { withCredentials: true });
+      Cookies.remove("access_token");
+      
       setUser(null);
       navigate("/login");
+
     } catch (err) {
       console.error("Logout failed:", err);
     }

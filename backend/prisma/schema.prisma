@@ -20,13 +20,14 @@ model User {
   email      String?  @unique
   username   String
   password   String?
-  provider   String?  // 'facebook', 'google', 'local', etc.
-  providerId String?  // Facebook ID, Google ID, etc.
+  provider   String?  
+  providerId String?  
   picture    String?
 
-  likes    Like[]
+  likes      Like[]
+  images     Image[]
 
-  // Omise subscription fields
+  // Subscription / Payment fields
   omiseCustomerId    String?  @db.VarChar(64)
   omiseCardId        String?  @db.VarChar(64)
   omiseScheduleId    String?  @db.VarChar(64)
@@ -35,8 +36,8 @@ model User {
   nextBillingAt      DateTime?
   lastChargeId       String?  @db.VarChar(64)
 
-  usedThisMonth      Int      @default(0) //จำนวนภาพที่ใช้
-  maxGenerate        Int      @default(0) //จำนวน Max
+  usedThisMonth      Int      @default(0) // จำนวนภาพที่ใช้
+  maxGenerate        Int      @default(0) // จำนวน max ของเดือน (backend คำนวณจาก planId)
 
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -58,18 +59,21 @@ model Charge {
 }
 
 model Image {
-  id        String
-  title     String
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
   src       String
+  title     String
+  createdAt DateTime @default(now())
   likes     Like[]
 }
 
 model Like {
-  id       String
-  userId   String
-  imageId  String
-  image    Image  @relation(fields: [imageId], references: [id])
-  user     User   @relation(fields: [userId], references: [id])
+  id      String  @id @default(cuid())
+  userId  String
+  imageId String
+  user    User    @relation(fields: [userId], references: [id])
+  image   Image   @relation(fields: [imageId], references: [id])
 
   @@unique([userId, imageId])
 }

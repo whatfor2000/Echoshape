@@ -2,14 +2,13 @@ import { Box, Button, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import ImageComponent from '../components/Images'
 import { NavLink } from 'react-router-dom'
-import { useCookies } from 'react-cookie'
+import Cookies from 'js-cookie'
 
 const Home: React.FC = () => {
   const [isLogin, setIsLogin] = useState(false)
-  const [cookies, setCookie] = useCookies(['access_token']);
 
   useEffect(() => {
-    const token = cookies.access_token
+    const token = Cookies.get('access_token')
     setIsLogin(()=>{
       if(!token) return false
       return true

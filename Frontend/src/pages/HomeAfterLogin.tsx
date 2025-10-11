@@ -180,6 +180,7 @@ const Home: React.FC = () => {
           <img
             src={selectedImage.src}
             alt={selectedImage.title}
+            loading="lazy"
             style={{ width: "100%", height: "auto", display: "block" }}
           />
         )}
