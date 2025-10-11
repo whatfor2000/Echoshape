@@ -22,7 +22,7 @@ const UserProfilePage: React.FC = () => {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch('http://localhost:3000/users/profile', {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
             headers: {
             'Authorization': `Bearer ${Cookies.get('access_token')}`,
             },

@@ -37,7 +37,7 @@ const Home: React.FC = () => {
           setLoading(false);
           return;
         }
-        const res = await fetch("http://localhost:3000/users/profile", {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users/profile`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
@@ -60,7 +60,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     async function fetchImages() {
       try {
-        const res = await axios.get("http://localhost:3000/images");
+        const res = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/images`);
         setImages(res.data);
 
         const initialLikes: { [key: string]: boolean } = {};
@@ -83,7 +83,7 @@ const Home: React.FC = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:3000/likes/toggle", {
+      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/likes/toggle`, {
         userId: user.id,
         imageId,
       });

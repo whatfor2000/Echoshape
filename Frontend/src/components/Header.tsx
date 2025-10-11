@@ -15,7 +15,7 @@ const Header: React.FC = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:3000/auth/logout", {}, { withCredentials: true });
+      await axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/logout`, {}, { withCredentials: true });
       setUser(null);
       navigate("/login");
     } catch (err) {

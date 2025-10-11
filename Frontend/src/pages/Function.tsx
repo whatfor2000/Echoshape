@@ -28,7 +28,7 @@ const Function: React.FC = () => {
   useEffect(() => {
     async function fetchSubscription() {
       try {
-        const res = await fetch('http://localhost:3000/subscriptions/me', {
+        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/subscriptions/me`, {
           headers: {
             'Authorization': `Bearer ${Cookies.get('access_token')}`,
           },
