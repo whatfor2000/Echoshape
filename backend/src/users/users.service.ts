@@ -34,8 +34,8 @@ export class UsersService {
         usedThisMonth: true,
         maxGenerate: true,
         planId: true,
-        nextBillingAt: true,   // ✅ เพิ่ม field ที่ขาด
-        lastChargeId: true,    // ✅ เพิ่ม field ที่ขาด
+        nextBillingAt: true,
+        lastChargeId: true,  
       },
     });
   }

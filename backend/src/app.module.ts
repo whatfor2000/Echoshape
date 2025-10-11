@@ -1,3 +1,7 @@
+import { ImagesModule } from './images/images.module';
+import { LikesController } from './likes/likes.controller';
+import { LikesService } from './likes/likes.service';
+import { ImagesService } from './images/images.service';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -10,13 +14,17 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 
 @Module({
   imports: [
-    AuthModule, 
-    UsersModule,OmiseModule,SubscriptionsModule,
+    ImagesModule,
+    AuthModule,
+    UsersModule, OmiseModule, SubscriptionsModule,
     ConfigModule.forRoot({
-    isGlobal: true,
-    envFilePath: '.env',
-  }), RegisterModule,],
-  controllers: [AppController],
-  providers: [AppService],
+      isGlobal: true,
+      envFilePath: '.env',
+    }), RegisterModule,],
+  controllers: [
+    LikesController, AppController],
+  providers: [
+    LikesService,
+    ImagesService, AppService],
 })
 export class AppModule { }

@@ -63,7 +63,7 @@ const Login = () => {
                     setMessage('Login successful!');
                     // You would typically redirect the user here or update state
                     setTimeout(() => {
-                        navigate('/')
+                        navigate('/HomeAfterLogin');
                         window.location.reload();
                     }, 1500)
                 } else {

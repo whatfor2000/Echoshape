@@ -35,7 +35,7 @@ const Home: React.FC = () => {
         </Box>
         <NavLink
           to={
-            isLogin ? "/function" : "/login"
+            isLogin ? "/HomeAfterLogin" : "/login"
           }
         >
           <Button

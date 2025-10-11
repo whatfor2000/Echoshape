@@ -43,8 +43,11 @@ const Header: React.FC = () => {
           <NavLink to="/" style={({ isActive }) => ({ ...linkStyle, ...(isActive ? activeStyle : {}) })}>
             <Typography sx={TextStyle}>Home</Typography>
           </NavLink>
+          <NavLink to={isLogin ? "/HomeAfterLogin" : "/login"} style={({ isActive }) => ({ ...linkStyle, ...(isActive ? activeStyle : {}) })}>
+            <Typography sx={TextStyle}>Explore</Typography>
+          </NavLink>
           <NavLink to={isLogin ? "/function" : "/login"} style={({ isActive }) => ({ ...linkStyle, ...(isActive ? activeStyle : {}) })}>
-            <Typography sx={TextStyle}>Function</Typography>
+            <Typography sx={TextStyle}>Create Picture</Typography>
           </NavLink>
           <NavLink to="/about" style={({ isActive }) => ({ ...linkStyle, ...(isActive ? activeStyle : {}) })}>
             <Typography sx={TextStyle}>About</Typography>

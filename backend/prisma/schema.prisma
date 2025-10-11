@@ -24,6 +24,8 @@ model User {
   providerId String?  // Facebook ID, Google ID, etc.
   picture    String?
 
+  likes    Like[]
+
   // Omise subscription fields
   omiseCustomerId    String?  @db.VarChar(64)
   omiseCardId        String?  @db.VarChar(64)
@@ -53,4 +55,21 @@ model Charge {
   promptpayUrl String
   status       String
   createdAt    DateTime @default(now())
+}
+
+model Image {
+  id        String
+  title     String
+  src       String
+  likes     Like[]
+}
+
+model Like {
+  id       String
+  userId   String
+  imageId  String
+  image    Image  @relation(fields: [imageId], references: [id])
+  user     User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, imageId])
 }
