@@ -1,9 +1,25 @@
 import React, { useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
-import { Box, Grid, IconButton, Typography, Dialog } from "@mui/material";
+import {
+  Box,
+  Grid,
+  IconButton,
+  Typography,
+  Dialog,
+  Tooltip,
+  Snackbar,
+  Alert,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FacebookIcon from "@mui/icons-material/Facebook";
+import ShareIcon from "@mui/icons-material/Share";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useNavigate } from "react-router-dom";
 
 interface User {
@@ -26,6 +42,9 @@ const Home: React.FC = () => {
   const [images, setImages] = useState<ImageData[]>([]);
   const [likes, setLikes] = useState<{ [key: string]: boolean }>({});
   const [selectedImage, setSelectedImage] = useState<ImageData | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareImage, setShareImage] = useState<ImageData | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
   const navigate = useNavigate();
 
   // Fetch user
@@ -108,6 +127,26 @@ const Home: React.FC = () => {
     }
   };
 
+  // Share functions
+  const shareToFacebook = (imgUrl: string) => {
+    const shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(imgUrl)}`;
+    window.open(shareUrl, "_blank", "width=600,height=400");
+  };
+
+  const shareToLine = (imgUrl: string) => {
+    const shareUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(imgUrl)}`;
+    window.open(shareUrl, "_blank", "width=600,height=400");
+  };
+
+  const copyLink = async (imgUrl: string) => {
+    try {
+      await navigator.clipboard.writeText(imgUrl);
+      setSnackbarOpen(true);
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
 
   return (
@@ -143,6 +182,7 @@ const Home: React.FC = () => {
                 onClick={() => setSelectedImage(img)}
               />
 
+              {/* Bottom right icons */}
               <Box
                 sx={{
                   position: "absolute",
@@ -151,11 +191,12 @@ const Home: React.FC = () => {
                   display: "flex",
                   alignItems: "center",
                   gap: 1,
-                  backgroundColor: "rgba(0,0,0,0.3)",
+                  backgroundColor: "rgba(0,0,0,0.4)",
                   borderRadius: "50px",
                   padding: "4px 8px",
                 }}
               >
+                {/* Like */}
                 <IconButton
                   onClick={(e) => {
                     e.stopPropagation();
@@ -165,16 +206,28 @@ const Home: React.FC = () => {
                 >
                   {likes[img.id] ? <FavoriteIcon fontSize="large" /> : <FavoriteBorderIcon fontSize="large" />}
                 </IconButton>
-                <Typography sx={{ color: "white", fontWeight: "bold" }}>
-                  {img.likes.length}
-                </Typography>
+                <Typography sx={{ color: "white", fontWeight: "bold" }}>{img.likes.length}</Typography>
+
+                {/* Share button */}
+                <Tooltip title="Share">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShareImage(img);
+                      setShareDialogOpen(true);
+                    }}
+                    sx={{ color: "white" }}
+                  >
+                    <ShareIcon />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
           </Grid>
         ))}
       </Grid>
 
-      {/* Modal สำหรับรูปเต็ม */}
+      {/* Modal แสดงภาพเต็ม */}
       <Dialog open={!!selectedImage} onClose={() => setSelectedImage(null)} maxWidth="lg">
         {selectedImage && (
           <img
@@ -185,6 +238,66 @@ const Home: React.FC = () => {
           />
         )}
       </Dialog>
+
+      {/* Dialog Share */}
+      <Dialog open={shareDialogOpen} onClose={() => setShareDialogOpen(false)}>
+        <DialogTitle>แชร์ภาพนี้</DialogTitle>
+        <DialogContent
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            gap: 3,
+            padding: 3,
+          }}
+        >
+          {shareImage && (
+            <>
+              <Tooltip title="Share on Facebook">
+                <IconButton onClick={() => shareToFacebook(shareImage.src)} sx={{ color: "#1877f2" }}>
+                  <FacebookIcon fontSize="large" />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Share on LINE">
+                <IconButton onClick={() => shareToLine(shareImage.src)}>
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/4/41/LINE_logo.svg"
+                    alt="LINE"
+                    width={32}
+                    height={32}
+                  />
+                </IconButton>
+              </Tooltip>
+
+              <Tooltip title="Copy image URL">
+                <IconButton onClick={() => copyLink(shareImage.src)} sx={{ color: "gray" }}>
+                  <ContentCopyIcon fontSize="large" />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShareDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar แจ้งว่า Copy แล้ว */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          📋 Copied image link!
+        </Alert>
+      </Snackbar>
     </>
   );
 };
