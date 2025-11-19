@@ -20,9 +20,60 @@ model User {
   email      String?  @unique
   username   String
   password   String?
-  provider   String?  // 'facebook', 'google', 'local', etc.
-  providerId String?  // Facebook ID, Google ID, etc.
+  provider   String?  
+  providerId String?  
   picture    String?
+
+  likes      Like[]
+  images     Image[]
+
+  // Subscription / Payment fields
+  omiseCustomerId    String?  @db.VarChar(64)
+  omiseCardId        String?  @db.VarChar(64)
+  omiseScheduleId    String?  @db.VarChar(64)
+  subscriptionStatus String?  @default("inactive") // inactive | active | past_due | cancelled
+  planId             String?  @db.VarChar(64)
+  nextBillingAt      DateTime?
+  lastChargeId       String?  @db.VarChar(64)
+
+  usedThisMonth      Int      @default(0) // จำนวนภาพที่ใช้
+  maxGenerate        Int      @default(0) // จำนวน max ของเดือน (backend คำนวณจาก planId)
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+}
+
+model ProcessedEvent {
+  id        String   @id @default(cuid())
+  eventId   String   @unique
+  createdAt DateTime @default(now())
+}
+
+model Charge {
+  id           String   @id @default(cuid())
+  amount       Int
+  currency     String
+  promptpayUrl String
+  status       String
+  createdAt    DateTime @default(now())
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  src       String
+  title     String
+  createdAt DateTime @default(now())
+  likes     Like[]
+}
+
+model Like {
+  id      String  @id @default(cuid())
+  userId  String
+  imageId String
+  user    User    @relation(fields: [userId], references: [id])
+  image   Image   @relation(fields: [imageId], references: [id])
+
+  @@unique([userId, imageId])
 }

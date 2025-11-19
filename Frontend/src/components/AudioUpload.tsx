@@ -3,9 +3,10 @@ import React, { useState } from 'react'
 
 type Props = {
   onResult: (data: unknown) => void
+  disabled?: boolean
 }
 
-const AudioUpload: React.FC<Props> = ({ onResult }) => {
+const AudioUpload: React.FC<Props> = ({ onResult, disabled }) => {
   const [audioSrc, setAudioSrc] = useState<string | null>(null)
   const [liveScript, setLiveScript] = useState<string>('')
 
@@ -103,7 +104,7 @@ const AudioUpload: React.FC<Props> = ({ onResult }) => {
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Button variant="contained" component="label" sx={ButtonStyle}>
+          <Button variant="contained" component="label" sx={ButtonStyle} disabled={disabled}>
             📁 Upload Audio File
             <input
               type="file"

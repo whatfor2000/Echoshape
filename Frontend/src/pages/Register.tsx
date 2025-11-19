@@ -32,7 +32,7 @@ const Register = () => {
     setMessage('');
 
     try {
-      const response = await fetch('http://localhost:3000/register', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

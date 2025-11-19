@@ -36,7 +36,7 @@ const Login = () => {
 
     const handleFacebookLogin = () => {
         // redirect ไป backend
-        window.location.href = "http://localhost:3000/auth/facebook";
+        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/facebook`;
     };
 
     const handleLogin = async (e: any) => {
@@ -45,7 +45,7 @@ const Login = () => {
         setMessage('');
 
         try {
-            const response = await fetch('http://localhost:3000/auth/login', {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ const Login = () => {
                     setMessage('Login successful!');
                     // You would typically redirect the user here or update state
                     setTimeout(() => {
-                        navigate('/')
+                        navigate('/HomeAfterLogin');
                         window.location.reload();
                     }, 1500)
                 } else {

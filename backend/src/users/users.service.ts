@@ -17,18 +17,26 @@ export class UsersService {
 
   async findById(id: string): Promise<Omit<User, 'password'> | null> {
     return this.prisma.user.findFirst({
-      where: { id },
+      where: { id }, // แก้ userId → id
       select: {
         id: true,
-        username: true,
         email: true,
+        username: true,
         provider: true,
         providerId: true,
         picture: true,
         createdAt: true,
         updatedAt: true,
-        // password: false, // password is omitted by type, not needed here
-      }
+        omiseCustomerId: true,
+        omiseCardId: true,
+        omiseScheduleId: true,
+        subscriptionStatus: true,
+        usedThisMonth: true,
+        maxGenerate: true,
+        planId: true,
+        nextBillingAt: true,
+        lastChargeId: true,  
+      },
     });
   }
   // ✅ หา FacebookUser ด้วย provider + providerId
@@ -58,5 +66,23 @@ export class UsersService {
         password: data.password,
       },
     });
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        picture: true,
+        subscriptionStatus: true,
+        planId: true,
+        nextBillingAt: true,
+        usedThisMonth: true,
+        maxGenerate: true,
+      },
+    });
+    return user;
   }
 }
