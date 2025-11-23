@@ -6,9 +6,10 @@ from ThaiserEmotionModel import Thaiser
 from whisper import Speechtotext
 # from sr import Speechtotext
 from imagegen import generate_image
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 app = Flask(__name__, template_folder="templates", static_folder="static")
 CORS(app)
+@cross_origin()
 @app.route("/")
 def home():
     return render_template("index.html")
