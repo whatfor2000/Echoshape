@@ -61,7 +61,8 @@ const Function: React.FC = () => {
       const res = await fetch('http://localhost:3000/subscriptions/generate-image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' ,
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          // 'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Authorization': `Bearer ${Cookies.get('access_token')}`,
         },
         credentials: 'include',
         body: JSON.stringify({ imageUrl: data.image, amount: 0 }),
