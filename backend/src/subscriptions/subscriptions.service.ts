@@ -35,6 +35,7 @@ export class SubscriptionsService {
     // เรียกเมื่อ user generate ภาพ
   async generateImage(userId: string, imageUrl: string, amount: number) {
     // ดึงข้อมูล user
+    console.log(imageUrl);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new BadRequestException('User not found');
 
