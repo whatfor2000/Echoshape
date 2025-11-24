@@ -9,7 +9,12 @@ from imagegen import generate_image
 from flask_cors import CORS, cross_origin
 app = Flask(__name__, template_folder="templates", static_folder="static")
 # CORS(app)
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+# CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, 
+     resources={r"/*": {"origins": "*"}},
+     allow_headers=["Content-Type", "Authorization"],
+     methods=["GET", "POST", "OPTIONS"],
+     supports_credentials=True)
 @cross_origin()
 @app.route("/")
 def home():
