@@ -38,6 +38,7 @@ const AudioUpload: React.FC<Props> = ({ onResult, disabled }) => {
       const data = await response.json();
       console.log('Response:', data);
 
+
       if (response.ok) {
         alert('Upload Success!');
         onResult(data); // 🔥 ส่งผลลัพธ์กลับไปยัง Function

@@ -45,6 +45,7 @@ export class SubscriptionsService {
       return `${adj} ${noun}`;
     }
     // ดึงข้อมูล user
+    console.log(imageUrl);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new BadRequestException('User not found');
 

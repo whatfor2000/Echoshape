@@ -55,7 +55,7 @@ const Function: React.FC = () => {
           'Authorization': `Bearer ${Cookies.get('access_token')}`,
         },
         credentials: 'include',
-        body: JSON.stringify({ imageUrl: data.image, amount: 0 }),
+        body: JSON.stringify({ imageUrl: data.url, amount: 0 }),
       })
       const resData = await res.json()
       if (!res.ok) {
