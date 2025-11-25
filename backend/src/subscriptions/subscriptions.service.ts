@@ -34,13 +34,23 @@ export class SubscriptionsService {
 
     // เรียกเมื่อ user generate ภาพ
   async generateImage(userId: string, imageUrl: string, amount: number) {
+    
+    function generateRandomTitle() {
+      const adjectives = ['Amazing', 'Epic', 'Cool', 'Funny', 'Mysterious', 'Vibrant', 'Magical', 'Elegant'];
+      const nouns = ['Landscape', 'Portrait', 'Scene', 'Artwork', 'Character', 'Creature', 'World', 'Vision'];
+
+      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+      const noun = nouns[Math.floor(Math.random() * nouns.length)];
+
+      return `${adj} ${noun}`;
+    }
     // ดึงข้อมูล user
     console.log(imageUrl);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new BadRequestException('User not found');
 
     // กำหนด limit
-    const maxImages = user.subscriptionStatus === 'active' ? 50 : 2;
+    const maxImages = user.subscriptionStatus === 'active' ? 50 : 30;
 
     // เช็ค limit
     if (user.usedThisMonth >= maxImages) {
@@ -57,8 +67,15 @@ export class SubscriptionsService {
       },
     });
 
-    // อัปเดต user usedThisMonth
-    await this.prisma.user.update({
+    const savedImage = await this.prisma.image.create({
+      data: {
+        userId: user.id,
+        src: imageUrl,
+        title: generateRandomTitle(),
+      },
+    });
+
+    const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
         usedThisMonth: user.usedThisMonth + 1,
@@ -67,8 +84,9 @@ export class SubscriptionsService {
 
     return {
       message: 'Image generated successfully',
-      usedThisMonth: user.usedThisMonth + 1,
+      usedThisMonth: updatedUser.usedThisMonth,
       maxImages,
+      image: savedImage,
     };
   }
 

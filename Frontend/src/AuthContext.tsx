@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       window.location.href = window.location.href.replace(/#.*/, '');
     }
     axios
-      .get("http://localhost:3000/auth/profile", { withCredentials: true })
+      .get(`${import.meta.env.VITE_BACKEND_URL}/auth/profile`, { withCredentials: true })
       .then(res => setUser(res.data))
       .catch(() => setUser(null));
   }, []);
