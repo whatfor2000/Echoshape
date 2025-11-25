@@ -33,9 +33,10 @@ export class SubscriptionsController {
   }
   
 
-
+  @UseGuards(JwtAuthGuard)
   @Post('generate-image')
   async generateImage(@Req() req: any, @Body() body: { imageUrl: string; amount: number }) {
+    console.log(req.user);
     const userId = req.user?.Id; // จาก OAuth / AuthGuard
     return this.svc.generateImage(userId, body.imageUrl, body.amount);
   }

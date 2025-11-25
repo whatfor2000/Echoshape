@@ -8,6 +8,7 @@ interface ImageProps {
   width?: string | number;
   height?: string | number;
   fallbackSrc?: string;
+  //blurred?: boolean;
 }
 
 const ImageComponent: React.FC<ImageProps> = ({ src, alt, title, width, height, fallbackSrc }) => {
@@ -36,19 +37,24 @@ const ImageComponent: React.FC<ImageProps> = ({ src, alt, title, width, height, 
       <Typography variant="h6" sx={{ marginBottom: "1rem", fontWeight: 600, fontFamily: 'Bebas Neue', color: "#28378B" }}>
         {title}
       </Typography>
-      <img
-        src={src}
-        alt={alt}
-        onClick={openDialog} // คลิกเพื่อเปิดรูปขยาย
-        onError={handleError}
-        style={{
-          width: width ? width : "100%",
-          height: height ? height : "auto",
-          objectFit: "cover",
-          cursor: "pointer", // เปลี่ยนเป็นรูปมือเมื่อ hover
-        }}
-      />
-      
+
+      <div style={{ position: 'relative', width: width || "100%" }}>
+        <img
+          src={src}
+          alt={alt}
+          onClick={openDialog} // คลิกเพื่อเปิดรูปขยาย
+          onError={handleError}
+          style={{
+            width: "100%",
+            height: height || "auto",
+            objectFit: "cover",
+            cursor: "pointer",
+            transition: "0.3s ease",
+            borderRadius: "8px",
+          }}
+        />
+      </div>
+
       {/* Dialog แสดงภาพขยาย */}
       <dialog ref={dialogRef} onClick={closeDialog} style={{ border: "none", background: "rgba(0, 0, 0, 0.2)", padding: "20px" }}>
         <img

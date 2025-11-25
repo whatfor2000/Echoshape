@@ -23,8 +23,6 @@ const Function: React.FC = () => {
   })
   const [loading, setLoading] = useState(false)
 
-
-  // fetch subscription info จาก backend
   useEffect(() => {
     async function fetchSubscription() {
       try {
@@ -49,19 +47,12 @@ const Function: React.FC = () => {
   }
 
   const handleGenerate = async (data: any) => {
-    // เช็ค limit ก่อน call backend
-    if (subscription.usedThisMonth >= subscription.maxGenerate) {
-      alert(`คุณใช้จำนวนภาพครบ limit แล้ว (${subscription.maxGenerate} ภาพต่อเดือน)`)
-      return
-    }
-
     setLoading(true)
     try {
-      // เรียก backend เพื่อบันทึก charge และ update usedThisMonth
-      const res = await fetch('http://localhost:3000/subscriptions/generate-image', {
+      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/subscriptions/generate-image`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' ,
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${Cookies.get('access_token')}`,
         },
         credentials: 'include',
         body: JSON.stringify({ imageUrl: data.image, amount: 0 }),
@@ -72,7 +63,6 @@ const Function: React.FC = () => {
         return
       }
 
-      // update frontend state
       setResult(data)
       setSubscription(prev => ({
         ...prev,
@@ -132,7 +122,7 @@ const Function: React.FC = () => {
               <Typography variant="h5" sx={{ mt: 2, ml: 2, fontWeight: 'bold', marginBottom: 3, color: '#fff' }}>
                 Analysis Results
               </Typography>
-              <ImageComponent height="240px" width="100%" src={result.image} alt="Generated" title="" />
+              <ImageComponent height="240px" width="100%" src={result.image} alt="Generated" title=""/>
               <Box sx={{ mt: 4, marginInline: '10px' }}>
                 <EmotionBar emoji="😠" emotion="Anger" value={result.probabilities.anger * 100} color="#d32f2f" />
                 <EmotionBar emoji="😤" emotion="Frustration" value={result.probabilities.frustration * 100} color="#ff9800" />
